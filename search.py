@@ -7,6 +7,8 @@ import signal
 import pymongo
 import urlparse
 
+from twython.exceptions import TwythonRateLimitError
+
 def exit_gracefully(signal, frame):
     sys.exit(0)
 
@@ -58,12 +60,48 @@ if current_query:
 else:
     since_id = None
 
-results = twitter.search(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id)
+def perform_query(**kwargs):
+    while True:
+        sleep(1.5)
+        try:
+            results = twitter.search(**kwargs)
+        except TwythonRateLimitError:
+            sys.stderr.write("Rate limit reached, taking a break for a minute...\n")
+            sleep(60)
+            continue
+        except:
+            sys.stderr.write("Some other error occured, taking a break for half a minute...")
+            sleep(30)
+        return results
 
-refresh_url = results['search_metadata'].get('refresh_url')
-p = urlparse.urlparse(refresh_url)
-since_id = dict(urlparse.parse_qsl(p.query))['since_id']
-queries.update({'query':query},{"$set":{'since_id':since_id}},upsert=True)
+def save_tweets(statuses):
+    for status in statuses:
+        tweets.update({'id':status['id']},status,upsert=True)
+
+while True:
+    results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id)
+
+    refresh_url = results['search_metadata'].get('refresh_url')
+    p = urlparse.urlparse(refresh_url)
+    new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
+    queries.update({'query':query},{"$set":{'since_id':new_since_id}},upsert=True)
+
+    #print results['http_headers']['x-rate-limit-remaining']
+    #print len(results['statuses'])
+    save_tweets(results['statuses'])
+
+    next_results = results['search_metadata'].get('next_results')
+    while next_results:
+        p = urlparse.urlparse(next_results)
+        next_results_max_id = dict(urlparse.parse_qsl(p.query))['max_id']
+        results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,max_id=next_results_max_id)
+        next_results = results['search_metadata'].get('next_results')
+        #print results['http_headers']['x-rate-limit-remaining']
+        #print len(results['statuses'])
+        save_tweets(results['statuses'])
+
+
+    since_id = new_since_id
 
 """
 if results.next_results:
@@ -73,5 +111,5 @@ if results.next_results:
             results.append(Status.parse(api, status))
 """
 
-for result in results['statuses']:
-    print result['text']
+#for result in results['statuses']:
+#    print result['text']

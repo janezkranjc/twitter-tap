@@ -4,3 +4,5 @@ CONSUMER_SECRET = ''
 
 # you can leave this empty, but after your first authentication paste it here to make authentication faster
 ACCESS_TOKEN = ''
+
+MONGODB_URI = 'mongodb://localhost:27017/'

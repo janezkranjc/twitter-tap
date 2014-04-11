@@ -102,6 +102,8 @@ def save_tweets(statuses):
     else:
         logger.debug("Received "+str(len(statuses))+" tweets.")
 
+logger.info("Starting...")
+
 while True:
     results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id)
 

@@ -3,3 +3,4 @@ oauthlib==0.6.1
 requests==2.1.0
 requests-oauthlib==0.4.0
 supervisor==3.0
+git+https://github.com/janezkranjc/twython.git

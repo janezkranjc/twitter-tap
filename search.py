@@ -1,21 +1,30 @@
 #!/usr/bin/env python
 
+import logging
 import sys
 import argparse
 from time import sleep
 import signal
-import pymongo
 import urlparse
-import logging
-
 from datetime import datetime
 from email.utils import parsedate
+
+FORMAT = '[%(asctime)-15s] %(levelname)s: %(message)s'
+
+try:
+    import pymongo
+    from twython.exceptions import TwythonRateLimitError, TwythonError
+    from twython import Twython
+except ImportError:
+    logging.basicConfig(format=FORMAT)
+    logger = logging.getLogger('twitter')
+    logger.fatal("Could not import, try running pip install -r requirements.txt")
+    sys.exit(1)
+
 
 
 def parse_datetime(string):
     return datetime(*(parsedate(string)[:6]))
-
-FORMAT = '[%(asctime)-15s] %(levelname)s: %(message)s'
 
 logging_dict = {
     "DEBUG":logging.DEBUG,
@@ -26,7 +35,6 @@ logging_dict = {
     "FATAL":logging.FATAL,
 }
 
-from twython.exceptions import TwythonRateLimitError, TwythonError
 
 def exit_gracefully(signal, frame):
     logger.warn("Shutdown signal received! Shutting down.")
@@ -37,11 +45,11 @@ signal.signal(signal.SIGTERM, exit_gracefully)
 
 try:
     import settings
-except:
-    sys.stderr.write("Please copy your __settings.py to settings.py and edit it.\n")
+except ImportError:
+    logging.basicConfig(format=FORMAT)
+    logger = logging.getLogger('twitter')
+    logger.fatal("Please copy your __settings.py to settings.py and edit it.")
     sys.exit(1)
-
-from twython import Twython
 
 parser = argparse.ArgumentParser(description='Query the Twitter API and store Tweets in MongoDB.')
 parser.add_argument('-q', '--query', type=unicode, dest='query', required=True, help='A UTF-8 search query of 1,000 characters maximum, including operators. Queries may additionally be limited by complexity. Information on how to construct a query is available at https://dev.twitter.com/docs/using-search')
@@ -120,7 +128,7 @@ while True:
     p = urlparse.urlparse(refresh_url)
     new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
     queries.update({'query':query,'geocode':geocode,'lang':lang},{"$set":{'since_id':new_since_id}},upsert=True)
-    logger.debug("Rate limit for current window: "+str(results['http_headers']['x-rate-limit-remaining']))
+    logger.debug("Rate limit for current window: "+str(results['headers']['x-rate-limit-remaining']))
     save_tweets(results['statuses'])
 
     next_results = results['search_metadata'].get('next_results')
@@ -129,7 +137,7 @@ while True:
         next_results_max_id = dict(urlparse.parse_qsl(p.query))['max_id']
         results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,max_id=next_results_max_id)
         next_results = results['search_metadata'].get('next_results')
-        logger.debug("Rate limit for current window: "+str(results['http_headers']['x-rate-limit-remaining']))
+        logger.debug("Rate limit for current window: "+str(results['headers']['x-rate-limit-remaining']))
         save_tweets(results['statuses'])
 
 

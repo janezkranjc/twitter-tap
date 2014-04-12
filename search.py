@@ -22,10 +22,11 @@ logging_dict = {
 from twython.exceptions import TwythonRateLimitError, TwythonError
 
 def exit_gracefully(signal, frame):
-    logger.warn("SIGINT signal received! Shutting down.")
+    logger.warn("Shutdown signal received! Shutting down.")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, exit_gracefully)
+signal.signal(signal.SIGTERM, exit_gracefully)
 
 try:
     import settings
@@ -50,7 +51,7 @@ lang = args.lang
 dbname = args.dbname
 loglevel = args.loglevel
 
-logging.basicConfig(format=FORMAT,level=logging_dict[loglevel])
+logging.basicConfig(format=FORMAT,level=logging_dict[loglevel],stream=sys.stdout)
 logger = logging.getLogger('twitter')
 
 # here we get the access token if it is not written in the settings

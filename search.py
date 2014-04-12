@@ -8,6 +8,13 @@ import pymongo
 import urlparse
 import logging
 
+from datetime import datetime
+from email.utils import parsedate
+
+
+def parse_datetime(string):
+    return datetime(*(parsedate(string)[:6]))
+
 FORMAT = '[%(asctime)-15s] %(levelname)s: %(message)s'
 
 logging_dict = {
@@ -96,6 +103,7 @@ def perform_query(**kwargs):
 
 def save_tweets(statuses):
     for status in statuses:
+        status['created_at']=parse_datetime(status['created_at'])
         tweets.update({'id':status['id']},status,upsert=True)
     if len(statuses)==0:
         logger.debug("No new tweets. Taking a break for 10 seconds...")
@@ -113,7 +121,6 @@ while True:
     new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
     queries.update({'query':query,'geocode':geocode,'lang':lang},{"$set":{'since_id':new_since_id}},upsert=True)
     logger.debug("Rate limit for current window: "+str(results['http_headers']['x-rate-limit-remaining']))
-    #print len(results['statuses'])
     save_tweets(results['statuses'])
 
     next_results = results['search_metadata'].get('next_results')
@@ -122,9 +129,7 @@ while True:
         next_results_max_id = dict(urlparse.parse_qsl(p.query))['max_id']
         results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,max_id=next_results_max_id)
         next_results = results['search_metadata'].get('next_results')
-        #print results['http_headers']['x-rate-limit-remaining']
         logger.debug("Rate limit for current window: "+str(results['http_headers']['x-rate-limit-remaining']))
-        #print len(results['statuses'])
         save_tweets(results['statuses'])
 
 

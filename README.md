@@ -20,26 +20,26 @@ If you're not using virtualenv or virtualenvwrapper you may skip this step.
 
 #### For virtualenvwrapper ####
 ```bash
-mkvirtualenv --no-site-packages twitter-env
+mkvirtualenv --no-site-packages twitter-tap
 ```
 
 #### For virtualenv ####
 ```bash
-virtualenv --no-site-packages twitter-env
-cd twitter-env
+virtualenv --no-site-packages twitter-tap
+cd twitter-tap
 source bin/activate
 ```
 
 ### Clone the code ###
-Obtain the url to your git repository.
 
 ```bash
-git clone git@source.ijs.si:jkranjc/twitter.git twitter
+git clone git@github.com:janezkranjc/twitter-tap.git
 ```
 
 ### Install requirements ###
+
 ```bash
-cd twitter
+cd twitter-tap
 pip install -r requirements.txt
 ```
 

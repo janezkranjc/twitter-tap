@@ -80,7 +80,7 @@ Alternatively you can see the status like this
 supervisorctl status
 ```
 
-Or see the tail of the logs (log file locations can be setup in supervisord.conf, default is ./temp/)
+Or see the tail of the logs (log file locations can be setup in supervisord.conf)
 
 ```bash
 supervisorctl tail tap

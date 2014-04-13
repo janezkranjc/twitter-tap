@@ -63,7 +63,12 @@ python tap.py -q "miley cyrus" -v DEBUG
 
 To run Tap as a daemon you are encouraged to use supervisor.
 
-The supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Just edit it to change the query.
+The __supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Copy and edit it to change the query.
+
+```bash
+cp __supervisord.conf supervisord.conf
+vi supervisord.conf
+```
 
 Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)
 

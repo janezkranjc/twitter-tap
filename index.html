@@ -4,11 +4,11 @@
   <head>
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Twitter-tap : A python tool for collecting tweets in mongoDB using the search API" />
+    <meta name="description" content="Twitter Tap : A python tool for collecting tweets in mongoDB using the search API" />
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Twitter-tap</title>
+    <title>Twitter Tap</title>
   </head>
 
   <body>
@@ -18,7 +18,7 @@
         <header class="inner">
           <a id="forkme_banner" href="https://github.com/janezkranjc/twitter-tap">View on GitHub</a>
 
-          <h1 id="project_title">Twitter-tap</h1>
+          <h1 id="project_title">Twitter Tap</h1>
           <h2 id="project_tagline">A python tool for collecting tweets in mongoDB using the search API</h2>
 
             <section id="downloads">
@@ -112,7 +112,11 @@ vi settings.py
 
 <p>To run Tap as a daemon you are encouraged to use supervisor.</p>
 
-<p>The supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Just edit it to change the query.</p>
+<p>The __supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Copy and edit it to change the query.</p>
+
+<div class="highlight highlight-bash"><pre>cp __supervisord.conf supervisord.conf
+vi supervisord.conf
+</pre></div>
 
 <p>Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
 
@@ -127,7 +131,7 @@ By default the username is manorastroman and the password kingofthedragonmen.</p
 <div class="highlight highlight-bash"><pre>supervisorctl status
 </pre></div>
 
-<p>Or see the tail of the logs (log file locations can be setup in supervisord.conf, default is ./temp/)</p>
+<p>Or see the tail of the logs (log file locations can be setup in supervisord.conf)</p>
 
 <div class="highlight highlight-bash"><pre>supervisorctl tail tap
 </pre></div>
@@ -160,7 +164,7 @@ By default the username is manorastroman and the password kingofthedragonmen.</p
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">Twitter-tap maintained by <a href="https://github.com/janezkranjc">janezkranjc</a></p>
+        <p class="copyright">Twitter Tap maintained by <a href="https://github.com/janezkranjc">janezkranjc</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>

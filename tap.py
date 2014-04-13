@@ -107,8 +107,8 @@ def perform_query(**kwargs):
             logger.warn("Rate limit reached, taking a break for a minute...\n")
             sleep(60)
             continue
-        except TwythonError:
-            logger.error("Some other error occured, taking a break for half a minute...")
+        except TwythonError, err:
+            logger.error("Some other error occured, taking a break for half a minute: "+str(err))
             sleep(30)
             continue
         return results

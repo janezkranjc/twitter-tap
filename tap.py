@@ -78,7 +78,11 @@ if settings.ACCESS_TOKEN == '':
 
 twitter = Twython(settings.CONSUMER_KEY, access_token=settings.ACCESS_TOKEN)
 
-client = pymongo.MongoClient(settings.MONGODB_URI)
+try:
+    client = pymongo.MongoClient(settings.MONGODB_URI)
+except:
+    logger.fatal("Couldn't connect to MongoDB. Please check your settings.")
+    sys.exit(1)
 
 db = client[dbname]
 

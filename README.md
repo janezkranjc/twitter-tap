@@ -94,6 +94,6 @@ supervisorctl shutdown
 
 # Useful Links #
 
-**MongoDB** https://www.mongodb.org/
-**Twitter developers** https://dev.twitter.com/
-**Documentation for virtualenvwrapper** http://virtualenvwrapper.readthedocs.org/en/latest/
+- **MongoDB** https://www.mongodb.org/
+- **Twitter developers** https://dev.twitter.com/
+- **Documentation for virtualenvwrapper** http://virtualenvwrapper.readthedocs.org/en/latest/

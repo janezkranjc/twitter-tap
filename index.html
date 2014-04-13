@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Twitter-tap : A python tool for collecting tweets in mongoDB using the search API" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Twitter-tap</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/janezkranjc/twitter-tap">View on GitHub</a>
+
+          <h1 id="project_title">Twitter-tap</h1>
+          <h2 id="project_tagline">A python tool for collecting tweets in mongoDB using the search API</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/janezkranjc/twitter-tap/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/janezkranjc/twitter-tap/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="twitter-tap" class="anchor" href="#twitter-tap"><span class="octicon octicon-link"></span></a>Twitter Tap</h1>
+
+<p>Collect tweets to a mongoDB using the twitter search API.</p>
+
+<h1>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting started</h1>
+
+<h2>
+<a name="prerequisites" class="anchor" href="#prerequisites"><span class="octicon octicon-link"></span></a>Prerequisites</h2>
+
+<ul>
+<li>python &gt;= 2.7</li>
+<li>pip</li>
+<li>mongodb</li>
+<li>virtualenvwrapper or virutalenvwrapper-win if on windows (optional but highly recommended)</li>
+</ul><h2>
+<a name="before-you-start" class="anchor" href="#before-you-start"><span class="octicon octicon-link"></span></a>Before you start</h2>
+
+<p>Please follow this link <a href="https://apps.twitter.com/">https://apps.twitter.com/</a> and create a twitter app. You will need the consumer key and consumer secret to access the twitter API.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<h3>
+<a name="creating-the-environment" class="anchor" href="#creating-the-environment"><span class="octicon octicon-link"></span></a>Creating the environment</h3>
+
+<p>Create a virtual python environment for the project.
+If you're not using virtualenv or virtualenvwrapper you may skip this step.</p>
+
+<h4>
+<a name="for-virtualenvwrapper" class="anchor" href="#for-virtualenvwrapper"><span class="octicon octicon-link"></span></a>For virtualenvwrapper</h4>
+
+<div class="highlight highlight-bash"><pre>mkvirtualenv --no-site-packages twitter-tap
+</pre></div>
+
+<h4>
+<a name="for-virtualenv" class="anchor" href="#for-virtualenv"><span class="octicon octicon-link"></span></a>For virtualenv</h4>
+
+<div class="highlight highlight-bash"><pre>virtualenv --no-site-packages twitter-tap
+<span class="nb">cd </span>twitter-tap
+<span class="nb">source </span>bin/activate
+</pre></div>
+
+<h3>
+<a name="clone-the-code" class="anchor" href="#clone-the-code"><span class="octicon octicon-link"></span></a>Clone the code</h3>
+
+<div class="highlight highlight-bash"><pre>git clone git@github.com:janezkranjc/twitter-tap.git
+</pre></div>
+
+<h3>
+<a name="install-requirements" class="anchor" href="#install-requirements"><span class="octicon octicon-link"></span></a>Install requirements</h3>
+
+<div class="highlight highlight-bash"><pre><span class="nb">cd </span>twitter-tap
+pip install -r requirements.txt
+</pre></div>
+
+<h3>
+<a name="copy-and-edit-the-settings-file" class="anchor" href="#copy-and-edit-the-settings-file"><span class="octicon octicon-link"></span></a>Copy and edit the settings file</h3>
+
+<div class="highlight highlight-bash"><pre>cp __settings.py settings.py
+vi settings.py
+</pre></div>
+
+<h2>
+<a name="show-help-text" class="anchor" href="#show-help-text"><span class="octicon octicon-link"></span></a>Show help text</h2>
+
+<div class="highlight highlight-bash"><pre>python tap.py -h
+</pre></div>
+
+<h2>
+<a name="executing-a-query" class="anchor" href="#executing-a-query"><span class="octicon octicon-link"></span></a>Executing a query</h2>
+
+<div class="highlight highlight-bash"><pre>python tap.py -q <span class="s2">"miley cyrus"</span> -v DEBUG
+</pre></div>
+
+<h1>
+<a name="running-as-a-daemon" class="anchor" href="#running-as-a-daemon"><span class="octicon octicon-link"></span></a>Running as a daemon</h1>
+
+<p>To run Tap as a daemon you are encouraged to use supervisor.</p>
+
+<p>The supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Just edit it to change the query.</p>
+
+<p>Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
+
+<div class="highlight highlight-bash"><pre>supervisord
+</pre></div>
+
+<p>Open your browser to <a href="http://127.0.0.1:9001">http://127.0.0.1:9001</a> to see the status of the daemon.
+By default the username is manorastroman and the password kingofthedragonmen.</p>
+
+<p>Alternatively you can see the status like this</p>
+
+<div class="highlight highlight-bash"><pre>supervisorctl status
+</pre></div>
+
+<p>Or see the tail of the logs (log file locations can be setup in supervisord.conf, default is ./temp/)</p>
+
+<div class="highlight highlight-bash"><pre>supervisorctl tail tap
+</pre></div>
+
+<p>Whenever you feel like shutting it down</p>
+
+<div class="highlight highlight-bash"><pre>supervisorctl shutdown
+</pre></div>
+
+<h1>
+<a name="useful-links" class="anchor" href="#useful-links"><span class="octicon octicon-link"></span></a>Useful Links</h1>
+
+<ul>
+<li>
+<strong>MongoDB</strong> <a href="https://www.mongodb.org/">https://www.mongodb.org/</a>
+</li>
+<li>
+<strong>Twitter developers</strong> <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>
+</li>
+<li>
+<strong>Supervisor</strong> <a href="http://supervisord.org/">http://supervisord.org/</a>
+</li>
+<li>
+<strong>Documentation for virtualenvwrapper</strong> <a href="http://virtualenvwrapper.readthedocs.org/en/latest/">http://virtualenvwrapper.readthedocs.org/en/latest/</a>
+</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Twitter-tap maintained by <a href="https://github.com/janezkranjc">janezkranjc</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

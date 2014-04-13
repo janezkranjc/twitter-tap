@@ -52,6 +52,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-settings.py
-
 *.pid
+
+#twitter-tap specific
+settings.py
+supervisord.conf

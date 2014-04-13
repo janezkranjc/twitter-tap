@@ -57,6 +57,7 @@ parser.add_argument('-g', '--geocode', type=unicode, dest='geocode', help='Retur
 parser.add_argument('-l', '--lang', type=unicode, dest='lang', help='Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort.\nExample value: eu')
 parser.add_argument('-d', '--dbname', type=unicode, dest='dbname', default='twitter', help='Database name. Defaults to \'twitter\'.')
 parser.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')
+parser.add_argument('-w', '--wait', type=float, dest='waittime', default=2.0, help='Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached.')
 
 args = parser.parse_args()
 
@@ -65,6 +66,7 @@ geocode = args.geocode
 lang = args.lang
 dbname = args.dbname
 loglevel = args.loglevel
+waittime = args.waittime
 
 logging.basicConfig(format=FORMAT,level=logging_dict[loglevel],stream=sys.stdout)
 logger = logging.getLogger('twitter')
@@ -100,7 +102,7 @@ else:
 
 def perform_query(**kwargs):
     while True:
-        sleep(1.5)
+        sleep(waittime)
         try:
             results = twitter.search(**kwargs)
         except TwythonRateLimitError:

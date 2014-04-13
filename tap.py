@@ -58,6 +58,7 @@ parser.add_argument('-l', '--lang', type=unicode, dest='lang', help='Restricts t
 parser.add_argument('-d', '--dbname', type=unicode, dest='dbname', default='twitter', help='Database name. Defaults to \'twitter\'.')
 parser.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')
 parser.add_argument('-w', '--wait', type=float, dest='waittime', default=2.0, help='Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached.')
+parser.add_argument('-r', '--remember', dest='remember', action='store_true', default=False, help="Set this switch to save since_id to the database so that when the daemon is restarted it will continue where it left off.")
 
 args = parser.parse_args()
 
@@ -67,6 +68,7 @@ lang = args.lang
 dbname = args.dbname
 loglevel = args.loglevel
 waittime = args.waittime
+remember_since_id = args.remember
 
 logging.basicConfig(format=FORMAT,level=logging_dict[loglevel],stream=sys.stdout)
 logger = logging.getLogger('twitter')
@@ -94,7 +96,10 @@ tweets = db.tweets
 queries.ensure_index([("query",pymongo.ASCENDING),("geocode",pymongo.ASCENDING),("lang",pymongo.ASCENDING)],unique=True)
 tweets.ensure_index("id",direction=pymongo.DESCENDING,unique=True)
 
-current_query = queries.find_one({'query':query,'geocode':geocode,'lang':lang})
+if remember_since_id:
+    current_query = queries.find_one({'query':query,'geocode':geocode,'lang':lang})
+else:
+    current_query = None
 if current_query:
     since_id = current_query['since_id']
 else:
@@ -145,6 +150,5 @@ while True:
         next_results = results['search_metadata'].get('next_results')
         logger.debug("Rate limit for current window: "+str(results['headers']['x-rate-limit-remaining']))
         save_tweets(results['statuses'])
-
 
     since_id = new_since_id

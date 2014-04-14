@@ -146,7 +146,7 @@ while True:
     p = urlparse.urlparse(refresh_url)
     new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
     queries.update({'query':query,'geocode':geocode,'lang':lang},{"$set":{'since_id':new_since_id}},upsert=True)
-    logger.debug("Rate limit for current window: "+str(results['headers']['x-rate-limit-remaining']))
+    logger.debug("Rate limit for current window: "+str(twitter.get_lastfunction_header(header="x-rate-limit-remaining")))
     save_tweets(results['statuses'])
 
     next_results = results['search_metadata'].get('next_results')
@@ -155,7 +155,7 @@ while True:
         next_results_max_id = dict(urlparse.parse_qsl(p.query))['max_id']
         results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,max_id=next_results_max_id,result_type=result_type)
         next_results = results['search_metadata'].get('next_results')
-        logger.debug("Rate limit for current window: "+str(results['headers']['x-rate-limit-remaining']))
+        logger.debug("Rate limit for current window: "+str(twitter.get_lastfunction_header(header="x-rate-limit-remaining")))
         save_tweets(results['statuses'])
 
     since_id = new_since_id

@@ -36,6 +36,17 @@
 
 <p>Collect tweets to a mongoDB using the twitter search API.</p>
 
+<h2>
+<a name="about-twitter-tap" class="anchor" href="#about-twitter-tap"><span class="octicon octicon-link"></span></a>About Twitter Tap</h2>
+
+<p>Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered. The tool follows all the <strong>next_results</strong> links (with the corresponding <strong>max_id</strong>) so that all results are collected. When all the <strong>next_results</strong> links are exhausted the query is repeated using the <strong>since_id</strong> of the latest tweet from the results of the first query and follows all the <strong>next_results</strong> links again. The latest <strong>since_id</strong> is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.</p>
+
+<p>Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so that there is no duplication of data if more than 1 query is executed simultaneously.</p>
+
+<p>There is an arbitrary wait time before each API call so that the rate limit is not reached. The default value of 2 seconds makes sure that there are no more than 450 requests per 15 minutes as is the rate limit of the search endpoint for authenticating with the app (not the user).</p>
+
+<p>The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.</p>
+
 <h1>
 <a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting started</h1>
 

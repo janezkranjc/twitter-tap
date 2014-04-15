@@ -12,72 +12,88 @@ There is an arbitrary wait time before each API call so that the rate limit is n
 
 The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.
 
-# Getting started #
-## Prerequisites ##
+# Installation #
 
-- python >= 2.7
-- pip
-- mongodb
-- virtualenvwrapper or virutalenvwrapper-win if on windows (optional but highly recommended)
+Install Twitter Tap using [pip](http://www.pip-installer.org/)
 
-## Before you start ##
+```bash
+pip install twitter-tap
+```
+
+Or, if you want the current code
+
+```bash
+git clone git://github.com/janezkranjc/twitter-tap.git
+cd twitter-tap
+python setup.py install
+```
+
+# Before you start #
+
 Please follow this link https://apps.twitter.com/ and create a twitter app. You will need the consumer key and consumer secret to access the twitter API.
 
-## Installation ##
-### Creating the environment ###
-Create a virtual python environment for the project.
-If you're not using virtualenv or virtualenvwrapper you may skip this step.
+# Using twitter tap #
 
-#### For virtualenvwrapper ####
+Run Twitter Tap in the command line like this.
+
 ```bash
-mkvirtualenv --no-site-packages twitter-tap
+tap
 ```
 
-#### For virtualenv ####
+### Show help text ###
 ```bash
-virtualenv --no-site-packages twitter-tap
-cd twitter-tap
-source bin/activate
+tap -h
 ```
 
-### Clone the code ###
+### Executing a query ###
+
+To execute a query you must provide a **query**, the **consumer secret** and either the **consumer key** or the access token. Consumer key and secret can be obtained at the http://apps.twitter.com/ website, while the access token will be obtained when first connecting with the key and secret.
 
 ```bash
-git clone git@github.com:janezkranjc/twitter-tap.git
-```
-
-### Install requirements ###
-
-```bash
-cd twitter-tap
-pip install -r requirements.txt
-```
-
-### Copy and edit the settings file ###
-```bash
-cp __settings.py settings.py
-vi settings.py
-```
-
-## Show help text ##
-```bash
-python tap.py -h
-```
-
-## Executing a query ##
-```bash
-python tap.py -q "miley cyrus" -v DEBUG
+tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
 ```
 
 # Running as a daemon #
 
-To run Tap as a daemon you are encouraged to use supervisor.
+To run Tap as a daemon you are encouraged to use supervisor. (Doesn't work natively under windows. You should use cygwin.)
 
-The __supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Copy and edit it to change the query.
+Here is a sample supervisord.conf file for running tap
 
 ```bash
-cp __supervisord.conf supervisord.conf
-vi supervisord.conf
+; Sample supervisor config file for daemonizing the twitter search to mongodb software
+
+[inet_http_server]          ; inet (TCP) server disabled by default
+port=127.0.0.1:9001         ; (ip_address:port specifier, *:port for all iface)
+username=manorastroman      ; (default is no username (open server))
+password=kingofthedragonmen ; (default is no password (open server))
+
+[supervisord]
+stopsignal=INT
+logfile=supervisord.log      ; (main log file;default $CWD/supervisord.log)
+logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10           ; (num of main logfile rotation backups;default 10)
+loglevel=info                ; (log level;default info; others: debug,warn,trace)
+pidfile=supervisord.pid      ; (supervisord pidfile;default supervisord.pid)
+nodaemon=false               ; (start in foreground if true;default false)
+minfds=1024                  ; (min. avail startup file descriptors;default 1024)
+minprocs=200                 ; (min. avail process descriptors;default 200)
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=http://127.0.0.1:9001 ; use an http:// url to specify an inet socket
+username=manorastroman       ; should be same as http_username if set
+password=kingofthedragonmen  ; should be same as http_password if set
+
+[program:tap]
+command=tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "janez kranjc" -v DEBUG
+stdout_logfile=tap.log
+stderr_logfile=tap_err.log
+autostart=true
+autorestart=true
+startsecs=10
+stopwaitsecs=10
 ```
 
 Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)
@@ -112,4 +128,3 @@ supervisorctl shutdown
 - **MongoDB** https://www.mongodb.org/
 - **Twitter developers** https://dev.twitter.com/
 - **Supervisor** http://supervisord.org/
-- **Documentation for virtualenvwrapper** http://virtualenvwrapper.readthedocs.org/en/latest/

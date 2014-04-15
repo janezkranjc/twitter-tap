@@ -141,7 +141,7 @@ v1.1.0 (dev):
 
 v1.0.0:
 
--  This version no longer reuires a separate settings.py file as all options can be entered as command line arguments
+-  This version no longer reuqires a separate settings.py file as all options can be entered as command line arguments
 
 v0.1.0:
 

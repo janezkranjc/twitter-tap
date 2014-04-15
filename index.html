@@ -36,137 +36,179 @@
 
 <p>Collect tweets to a mongoDB using the twitter search API.</p>
 
-<h2>
-<a name="about-twitter-tap" class="anchor" href="#about-twitter-tap"><span class="octicon octicon-link"></span></a>About Twitter Tap</h2>
+<h1>
+<a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h1>
 
-<p>Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered. The tool follows all the <strong>next_results</strong> links (with the corresponding <strong>max_id</strong>) so that all results are collected. When all the <strong>next_results</strong> links are exhausted the query is repeated using the <strong>since_id</strong> of the latest tweet from the results of the first query and follows all the <strong>next_results</strong> links again. The latest <strong>since_id</strong> is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.</p>
+<p>Twitter Tap is a python tool that connects to the Twitter API and issues
+calls to the search endpoint using a query that the user has entered.
+The tool follows all the <strong>next_results</strong> links (with the corresponding
+<strong>max_id</strong>) so that all results are collected. When all the
+<strong>next_results</strong> links are exhausted the query is repeated using the
+<strong>since_id</strong> of the latest tweet from the results of the first query
+and follows all the <strong>next_results</strong> links again. The latest
+<strong>since_id</strong> is also stored in the database for each distinct query
+(query, geolocation, language), so that when the tool is restarted you
+will still only receive unique tweets.</p>
 
-<p>Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so that there is no duplication of data if more than 1 query is executed simultaneously.</p>
+<p>Tweets are stored into a mongoDB, which has a unique index on the Tweet
+ID so that there is no duplication of data if more than 1 query is
+executed simultaneously.</p>
 
-<p>There is an arbitrary wait time before each API call so that the rate limit is not reached. The default value of 2 seconds makes sure that there are no more than 450 requests per 15 minutes as is the rate limit of the search endpoint for authenticating with the app (not the user).</p>
+<p>There is an arbitrary wait time before each API call so that the rate
+limit is not reached. The default value of 2 seconds makes sure that
+there are no more than 450 requests per 15 minutes as is the rate limit
+of the search endpoint for authenticating with the app (not the user).</p>
 
-<p>The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.</p>
+<p>The tool can be run from the command line or be run as a daemon using
+supervisor (recommended). A sample supervisord.conf script is included
+with the tool.</p>
 
 <h1>
-<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting started</h1>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
 
-<h2>
-<a name="prerequisites" class="anchor" href="#prerequisites"><span class="octicon octicon-link"></span></a>Prerequisites</h2>
+<p>Install Twitter Tap using <code>pip &lt;http://www.pip-installer.org/&gt;</code>__</p>
 
-<ul>
-<li>python &gt;= 2.7</li>
-<li>pip</li>
-<li>mongodb</li>
-<li>virtualenvwrapper or virutalenvwrapper-win if on windows (optional but highly recommended)</li>
-</ul><h2>
-<a name="before-you-start" class="anchor" href="#before-you-start"><span class="octicon octicon-link"></span></a>Before you start</h2>
+<p>.. code:: bash</p>
 
-<p>Please follow this link <a href="https://apps.twitter.com/">https://apps.twitter.com/</a> and create a twitter app. You will need the consumer key and consumer secret to access the twitter API.</p>
+<pre><code>pip install twitter-tap
+</code></pre>
 
-<h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<p>Or, if you want the current code</p>
 
-<h3>
-<a name="creating-the-environment" class="anchor" href="#creating-the-environment"><span class="octicon octicon-link"></span></a>Creating the environment</h3>
+<p>.. code:: bash</p>
 
-<p>Create a virtual python environment for the project.
-If you're not using virtualenv or virtualenvwrapper you may skip this step.</p>
+<pre><code>git clone git://github.com/janezkranjc/twitter-tap.git
+cd twitter-tap
+python setup.py install
+</code></pre>
 
-<h4>
-<a name="for-virtualenvwrapper" class="anchor" href="#for-virtualenvwrapper"><span class="octicon octicon-link"></span></a>For virtualenvwrapper</h4>
+<h1>
+<a name="before-you-start" class="anchor" href="#before-you-start"><span class="octicon octicon-link"></span></a>Before you start</h1>
 
-<div class="highlight highlight-bash"><pre>mkvirtualenv --no-site-packages twitter-tap
-</pre></div>
+<p>Please follow this link <a href="https://apps.twitter.com/">https://apps.twitter.com/</a> and create a twitter
+app. You will need the consumer key and consumer secret to access the
+twitter API.</p>
 
-<h4>
-<a name="for-virtualenv" class="anchor" href="#for-virtualenv"><span class="octicon octicon-link"></span></a>For virtualenv</h4>
+<h1>
+<a name="using-twitter-tap" class="anchor" href="#using-twitter-tap"><span class="octicon octicon-link"></span></a>Using twitter tap</h1>
 
-<div class="highlight highlight-bash"><pre>virtualenv --no-site-packages twitter-tap
-<span class="nb">cd </span>twitter-tap
-<span class="nb">source </span>bin/activate
-</pre></div>
+<p>Run Twitter Tap in the command line like this.</p>
 
-<h3>
-<a name="clone-the-code" class="anchor" href="#clone-the-code"><span class="octicon octicon-link"></span></a>Clone the code</h3>
+<p>.. code:: bash</p>
 
-<div class="highlight highlight-bash"><pre>git clone git@github.com:janezkranjc/twitter-tap.git
-</pre></div>
+<pre><code>tap
+</code></pre>
 
-<h3>
-<a name="install-requirements" class="anchor" href="#install-requirements"><span class="octicon octicon-link"></span></a>Install requirements</h3>
+<p>Show help text</p>
 
-<div class="highlight highlight-bash"><pre><span class="nb">cd </span>twitter-tap
-pip install -r requirements.txt
-</pre></div>
+<pre><code>
+.. code:: bash
 
-<h3>
-<a name="copy-and-edit-the-settings-file" class="anchor" href="#copy-and-edit-the-settings-file"><span class="octicon octicon-link"></span></a>Copy and edit the settings file</h3>
+    tap -h
 
-<div class="highlight highlight-bash"><pre>cp __settings.py settings.py
-vi settings.py
-</pre></div>
+Executing a query
+</code></pre>
 
-<h2>
-<a name="show-help-text" class="anchor" href="#show-help-text"><span class="octicon octicon-link"></span></a>Show help text</h2>
+<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong>
+and either the <strong>consumer key</strong> or the access token. Consumer key and
+secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while
+the access token will be obtained when first connecting with the key and
+secret.</p>
 
-<div class="highlight highlight-bash"><pre>python tap.py -h
-</pre></div>
+<p>.. code:: bash</p>
 
-<h2>
-<a name="executing-a-query" class="anchor" href="#executing-a-query"><span class="octicon octicon-link"></span></a>Executing a query</h2>
-
-<div class="highlight highlight-bash"><pre>python tap.py -q <span class="s2">"miley cyrus"</span> -v DEBUG
-</pre></div>
+<pre><code>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
+</code></pre>
 
 <h1>
 <a name="running-as-a-daemon" class="anchor" href="#running-as-a-daemon"><span class="octicon octicon-link"></span></a>Running as a daemon</h1>
 
-<p>To run Tap as a daemon you are encouraged to use supervisor.</p>
+<p>To run Tap as a daemon you are encouraged to use supervisor. (Doesn't
+work natively under windows. You should use cygwin.)</p>
 
-<p>The __supervisord.conf file is there to serve as a sample configuration file for supervisor. You can use it if you find it sufficient. Copy and edit it to change the query.</p>
+<p>Here is a sample supervisord.conf file for running tap</p>
 
-<div class="highlight highlight-bash"><pre>cp __supervisord.conf supervisord.conf
-vi supervisord.conf
-</pre></div>
+<p>.. code:: bash</p>
 
-<p>Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
+<pre><code>; Sample supervisor config file for daemonizing the twitter search to mongodb software
 
-<div class="highlight highlight-bash"><pre>supervisord
-</pre></div>
+[inet_http_server]          ; inet (TCP) server disabled by default
+port=127.0.0.1:9001         ; (ip_address:port specifier, *:port for all iface)
+username=manorastroman      ; (default is no username (open server))
+password=kingofthedragonmen ; (default is no password (open server))
 
-<p>Open your browser to <a href="http://127.0.0.1:9001">http://127.0.0.1:9001</a> to see the status of the daemon.
-By default the username is manorastroman and the password kingofthedragonmen.</p>
+[supervisord]
+stopsignal=INT
+logfile=supervisord.log      ; (main log file;default $CWD/supervisord.log)
+logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10           ; (num of main logfile rotation backups;default 10)
+loglevel=info                ; (log level;default info; others: debug,warn,trace)
+pidfile=supervisord.pid      ; (supervisord pidfile;default supervisord.pid)
+nodaemon=false               ; (start in foreground if true;default false)
+minfds=1024                  ; (min. avail startup file descriptors;default 1024)
+minprocs=200                 ; (min. avail process descriptors;default 200)
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=http://127.0.0.1:9001 ; use an http:// url to specify an inet socket
+username=manorastroman       ; should be same as http_username if set
+password=kingofthedragonmen  ; should be same as http_password if set
+
+[program:tap]
+command=tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "janez kranjc" -v DEBUG
+stdout_logfile=tap.log
+stderr_logfile=tap_err.log
+autostart=true
+autorestart=true
+startsecs=10
+stopwaitsecs=10
+</code></pre>
+
+<p>Afterwards you can start the daemon like this (you must be in the same
+folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
+
+<p>.. code:: bash</p>
+
+<pre><code>supervisord
+</code></pre>
+
+<p>Open your browser to <a href="http://127.0.0.1:9001">http://127.0.0.1:9001</a> to see the status of the
+daemon. By default the username is manorastroman and the password
+kingofthedragonmen.</p>
 
 <p>Alternatively you can see the status like this</p>
 
-<div class="highlight highlight-bash"><pre>supervisorctl status
-</pre></div>
+<p>.. code:: bash</p>
 
-<p>Or see the tail of the logs (log file locations can be setup in supervisord.conf)</p>
+<pre><code>supervisorctl status
+</code></pre>
 
-<div class="highlight highlight-bash"><pre>supervisorctl tail tap
-</pre></div>
+<p>Or see the tail of the logs (log file locations can be setup in
+supervisord.conf)</p>
+
+<p>.. code:: bash</p>
+
+<pre><code>supervisorctl tail tap
+</code></pre>
 
 <p>Whenever you feel like shutting it down</p>
 
-<div class="highlight highlight-bash"><pre>supervisorctl shutdown
-</pre></div>
+<p>.. code:: bash</p>
+
+<pre><code>supervisorctl shutdown
+</code></pre>
 
 <h1>
 <a name="useful-links" class="anchor" href="#useful-links"><span class="octicon octicon-link"></span></a>Useful Links</h1>
 
 <ul>
-<li>
-<strong>MongoDB</strong> <a href="https://www.mongodb.org/">https://www.mongodb.org/</a>
+<li> <strong>MongoDB</strong> <a href="https://www.mongodb.org/">https://www.mongodb.org/</a>
 </li>
-<li>
-<strong>Twitter developers</strong> <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>
+<li> <strong>Twitter developers</strong> <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>
 </li>
-<li>
-<strong>Supervisor</strong> <a href="http://supervisord.org/">http://supervisord.org/</a>
-</li>
-<li>
-<strong>Documentation for virtualenvwrapper</strong> <a href="http://virtualenvwrapper.readthedocs.org/en/latest/">http://virtualenvwrapper.readthedocs.org/en/latest/</a>
+<li> <strong>Supervisor</strong> <a href="http://supervisord.org/">http://supervisord.org/</a>
 </li>
 </ul>
       </section>

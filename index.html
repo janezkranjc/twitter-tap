@@ -37,179 +37,157 @@
 <p>Collect tweets to a mongoDB using the twitter search API.</p>
 
 <h1>
-<a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h1>
+<a name="about-twitter-tap" class="anchor" href="#about-twitter-tap"><span class="octicon octicon-link"></span></a>About Twitter Tap</h1>
 
-<p>Twitter Tap is a python tool that connects to the Twitter API and issues
-calls to the search endpoint using a query that the user has entered.
-The tool follows all the <strong>next_results</strong> links (with the corresponding
-<strong>max_id</strong>) so that all results are collected. When all the
-<strong>next_results</strong> links are exhausted the query is repeated using the
-<strong>since_id</strong> of the latest tweet from the results of the first query
-and follows all the <strong>next_results</strong> links again. The latest
-<strong>since_id</strong> is also stored in the database for each distinct query
-(query, geolocation, language), so that when the tool is restarted you
-will still only receive unique tweets.</p>
+<p>Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered. The tool follows all the <strong>next_results</strong> links (with the corresponding <strong>max_id</strong>) so that all results are collected. When all the <strong>next_results</strong> links are exhausted the query is repeated using the <strong>since_id</strong> of the latest tweet from the results of the first query and follows all the <strong>next_results</strong> links again. The latest <strong>since_id</strong> is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.</p>
 
-<p>Tweets are stored into a mongoDB, which has a unique index on the Tweet
-ID so that there is no duplication of data if more than 1 query is
-executed simultaneously.</p>
+<p>Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so that there is no duplication of data if more than 1 query is executed simultaneously.</p>
 
-<p>There is an arbitrary wait time before each API call so that the rate
-limit is not reached. The default value of 2 seconds makes sure that
-there are no more than 450 requests per 15 minutes as is the rate limit
-of the search endpoint for authenticating with the app (not the user).</p>
+<p>There is an arbitrary wait time before each API call so that the rate limit is not reached. The default value of 2 seconds makes sure that there are no more than 450 requests per 15 minutes as is the rate limit of the search endpoint for authenticating with the app (not the user).</p>
 
-<p>The tool can be run from the command line or be run as a daemon using
-supervisor (recommended). A sample supervisord.conf script is included
-with the tool.</p>
+<p>The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.</p>
 
 <h1>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
 
-<p>Install Twitter Tap using <code>pip &lt;http://www.pip-installer.org/&gt;</code>__</p>
+<p>Install Twitter Tap using <a href="http://www.pip-installer.org/">pip</a></p>
 
-<p>.. code:: bash</p>
-
-<pre><code>pip install twitter-tap
-</code></pre>
+<div class="highlight highlight-bash"><pre>pip install twitter-tap
+</pre></div>
 
 <p>Or, if you want the current code</p>
 
-<p>.. code:: bash</p>
-
-<pre><code>git clone git://github.com/janezkranjc/twitter-tap.git
-cd twitter-tap
+<div class="highlight highlight-bash"><pre>git clone git://github.com/janezkranjc/twitter-tap.git
+<span class="nb">cd </span>twitter-tap
 python setup.py install
-</code></pre>
+</pre></div>
 
 <h1>
 <a name="before-you-start" class="anchor" href="#before-you-start"><span class="octicon octicon-link"></span></a>Before you start</h1>
 
-<p>Please follow this link <a href="https://apps.twitter.com/">https://apps.twitter.com/</a> and create a twitter
-app. You will need the consumer key and consumer secret to access the
-twitter API.</p>
+<p>Please follow this link <a href="https://apps.twitter.com/">https://apps.twitter.com/</a> and create a twitter app. You will need the consumer key and consumer secret to access the twitter API.</p>
 
 <h1>
 <a name="using-twitter-tap" class="anchor" href="#using-twitter-tap"><span class="octicon octicon-link"></span></a>Using twitter tap</h1>
 
 <p>Run Twitter Tap in the command line like this.</p>
 
-<p>.. code:: bash</p>
+<div class="highlight highlight-bash"><pre>tap
+</pre></div>
 
-<pre><code>tap
-</code></pre>
+<h3>
+<a name="show-help-text" class="anchor" href="#show-help-text"><span class="octicon octicon-link"></span></a>Show help text</h3>
 
-<p>Show help text</p>
+<div class="highlight highlight-bash"><pre>tap -h
+</pre></div>
 
-<pre><code>
-.. code:: bash
+<h3>
+<a name="executing-a-query" class="anchor" href="#executing-a-query"><span class="octicon octicon-link"></span></a>Executing a query</h3>
 
-    tap -h
+<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong> and either the <strong>consumer key</strong> or the access token. Consumer key and secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while the access token will be obtained when first connecting with the key and secret.</p>
 
-Executing a query
-</code></pre>
+<div class="highlight highlight-bash"><pre>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"miley cyrus"</span> -v DEBUG
+</pre></div>
 
-<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong>
-and either the <strong>consumer key</strong> or the access token. Consumer key and
-secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while
-the access token will be obtained when first connecting with the key and
-secret.</p>
+<h3>
+<a name="where-are-the-tweets-stored" class="anchor" href="#where-are-the-tweets-stored"><span class="octicon octicon-link"></span></a>Where are the tweets stored</h3>
 
-<p>.. code:: bash</p>
-
-<pre><code>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
-</code></pre>
+<p>The tweets are stored in the mongoDB in a collection called <strong>tweets</strong>. This can be changed using the --tweets-collection option. There is also a collection for saving the highest since_id for queries, which is <strong>queries</strong> by default (can be changed using the --queries-collection option).</p>
 
 <h1>
 <a name="running-as-a-daemon" class="anchor" href="#running-as-a-daemon"><span class="octicon octicon-link"></span></a>Running as a daemon</h1>
 
-<p>To run Tap as a daemon you are encouraged to use supervisor. (Doesn't
-work natively under windows. You should use cygwin.)</p>
+<p>To run Tap as a daemon you are encouraged to use supervisor. (Doesn't work natively under windows. You should use cygwin.)</p>
 
 <p>Here is a sample supervisord.conf file for running tap</p>
 
-<p>.. code:: bash</p>
+<div class="highlight highlight-bash"><pre><span class="p">;</span> Sample supervisor config file <span class="k">for </span>daemonizing the twitter search to mongodb software
 
-<pre><code>; Sample supervisor config file for daemonizing the twitter search to mongodb software
+<span class="o">[</span>inet_http_server<span class="o">]</span>          <span class="p">;</span> inet <span class="o">(</span>TCP<span class="o">)</span> server disabled by default
+<span class="nv">port</span><span class="o">=</span>127.0.0.1:9001         <span class="p">;</span> <span class="o">(</span>ip_address:port specifier, *:port <span class="k">for </span>all iface<span class="o">)</span>
+<span class="nv">username</span><span class="o">=</span>manorastroman      <span class="p">;</span> <span class="o">(</span>default is no username <span class="o">(</span>open server<span class="o">))</span>
+<span class="nv">password</span><span class="o">=</span>kingofthedragonmen <span class="p">;</span> <span class="o">(</span>default is no password <span class="o">(</span>open server<span class="o">))</span>
 
-[inet_http_server]          ; inet (TCP) server disabled by default
-port=127.0.0.1:9001         ; (ip_address:port specifier, *:port for all iface)
-username=manorastroman      ; (default is no username (open server))
-password=kingofthedragonmen ; (default is no password (open server))
+<span class="o">[</span>supervisord<span class="o">]</span>
+<span class="nv">stopsignal</span><span class="o">=</span>INT
+<span class="nv">logfile</span><span class="o">=</span>supervisord.log      <span class="p">;</span> <span class="o">(</span>main log file<span class="p">;</span>default <span class="nv">$CWD</span>/supervisord.log<span class="o">)</span>
+<span class="nv">logfile_maxbytes</span><span class="o">=</span>50MB        <span class="p">;</span> <span class="o">(</span>max main logfile bytes b4 rotation<span class="p">;</span>default 50MB<span class="o">)</span>
+<span class="nv">logfile_backups</span><span class="o">=</span>10           <span class="p">;</span> <span class="o">(</span>num of main logfile rotation backups<span class="p">;</span>default 10<span class="o">)</span>
+<span class="nv">loglevel</span><span class="o">=</span>info                <span class="p">;</span> <span class="o">(</span>log level<span class="p">;</span>default info<span class="p">;</span> others: debug,warn,trace<span class="o">)</span>
+<span class="nv">pidfile</span><span class="o">=</span>supervisord.pid      <span class="p">;</span> <span class="o">(</span>supervisord pidfile<span class="p">;</span>default supervisord.pid<span class="o">)</span>
+<span class="nv">nodaemon</span><span class="o">=</span><span class="nb">false</span>               <span class="p">;</span> <span class="o">(</span>start in foreground <span class="k">if </span><span class="nb">true</span><span class="p">;</span>default <span class="nb">false</span><span class="o">)</span>
+<span class="nv">minfds</span><span class="o">=</span>1024                  <span class="p">;</span> <span class="o">(</span>min. avail startup file descriptors<span class="p">;</span>default 1024<span class="o">)</span>
+<span class="nv">minprocs</span><span class="o">=</span>200                 <span class="p">;</span> <span class="o">(</span>min. avail process descriptors<span class="p">;</span>default 200<span class="o">)</span>
 
-[supervisord]
-stopsignal=INT
-logfile=supervisord.log      ; (main log file;default $CWD/supervisord.log)
-logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
-logfile_backups=10           ; (num of main logfile rotation backups;default 10)
-loglevel=info                ; (log level;default info; others: debug,warn,trace)
-pidfile=supervisord.pid      ; (supervisord pidfile;default supervisord.pid)
-nodaemon=false               ; (start in foreground if true;default false)
-minfds=1024                  ; (min. avail startup file descriptors;default 1024)
-minprocs=200                 ; (min. avail process descriptors;default 200)
+<span class="o">[</span>rpcinterface:supervisor<span class="o">]</span>
+supervisor.rpcinterface_factory <span class="o">=</span> supervisor.rpcinterface:make_main_rpcinterface
 
-[rpcinterface:supervisor]
-supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+<span class="o">[</span>supervisorctl<span class="o">]</span>
+<span class="nv">serverurl</span><span class="o">=</span>http://127.0.0.1:9001 <span class="p">;</span> use an http:// url to specify an inet socket
+<span class="nv">username</span><span class="o">=</span>manorastroman       <span class="p">;</span> should be same as http_username <span class="k">if </span><span class="nb">set</span>
+<span class="nv">password</span><span class="o">=</span>kingofthedragonmen  <span class="p">;</span> should be same as http_password <span class="k">if </span><span class="nb">set</span>
 
-[supervisorctl]
-serverurl=http://127.0.0.1:9001 ; use an http:// url to specify an inet socket
-username=manorastroman       ; should be same as http_username if set
-password=kingofthedragonmen  ; should be same as http_password if set
+<span class="o">[</span>program:tap<span class="o">]</span>
+<span class="nb">command</span><span class="o">=</span>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"janez kranjc"</span> -v DEBUG
+<span class="nv">stdout_logfile</span><span class="o">=</span>tap.log
+<span class="nv">stderr_logfile</span><span class="o">=</span>tap_err.log
+<span class="nv">autostart</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">autorestart</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">startsecs</span><span class="o">=</span>10
+<span class="nv">stopwaitsecs</span><span class="o">=</span>10
+</pre></div>
 
-[program:tap]
-command=tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "janez kranjc" -v DEBUG
-stdout_logfile=tap.log
-stderr_logfile=tap_err.log
-autostart=true
-autorestart=true
-startsecs=10
-stopwaitsecs=10
-</code></pre>
+<p>Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
 
-<p>Afterwards you can start the daemon like this (you must be in the same
-folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
+<div class="highlight highlight-bash"><pre>supervisord
+</pre></div>
 
-<p>.. code:: bash</p>
-
-<pre><code>supervisord
-</code></pre>
-
-<p>Open your browser to <a href="http://127.0.0.1:9001">http://127.0.0.1:9001</a> to see the status of the
-daemon. By default the username is manorastroman and the password
-kingofthedragonmen.</p>
+<p>Open your browser to <a href="http://127.0.0.1:9001">http://127.0.0.1:9001</a> to see the status of the daemon.
+By default the username is manorastroman and the password kingofthedragonmen.</p>
 
 <p>Alternatively you can see the status like this</p>
 
-<p>.. code:: bash</p>
+<div class="highlight highlight-bash"><pre>supervisorctl status
+</pre></div>
 
-<pre><code>supervisorctl status
-</code></pre>
+<p>Or see the tail of the logs (log file locations can be setup in supervisord.conf)</p>
 
-<p>Or see the tail of the logs (log file locations can be setup in
-supervisord.conf)</p>
-
-<p>.. code:: bash</p>
-
-<pre><code>supervisorctl tail tap
-</code></pre>
+<div class="highlight highlight-bash"><pre>supervisorctl tail tap
+</pre></div>
 
 <p>Whenever you feel like shutting it down</p>
 
-<p>.. code:: bash</p>
-
-<pre><code>supervisorctl shutdown
-</code></pre>
+<div class="highlight highlight-bash"><pre>supervisorctl shutdown
+</pre></div>
 
 <h1>
-<a name="useful-links" class="anchor" href="#useful-links"><span class="octicon octicon-link"></span></a>Useful Links</h1>
+<a name="useful-links" class="anchor" href="#useful-links"><span class="octicon octicon-link"></span></a>Useful links</h1>
 
 <ul>
-<li> <strong>MongoDB</strong> <a href="https://www.mongodb.org/">https://www.mongodb.org/</a>
+<li>
+<strong>MongoDB</strong> <a href="https://www.mongodb.org/">https://www.mongodb.org/</a>
 </li>
-<li> <strong>Twitter developers</strong> <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>
+<li>
+<strong>Twitter developers</strong> <a href="https://dev.twitter.com/">https://dev.twitter.com/</a>
 </li>
-<li> <strong>Supervisor</strong> <a href="http://supervisord.org/">http://supervisord.org/</a>
+<li>
+<strong>Supervisor</strong> <a href="http://supervisord.org/">http://supervisord.org/</a>
 </li>
+</ul><h1>
+<a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h1>
+
+<p>v1.1.0 (dev):</p>
+
+<ul>
+<li> Added two options for changing the default collection names for queries and tweets.</li>
+</ul><p>v1.0.0:</p>
+
+<ul>
+<li> This version no longer reuqires a separate settings.py file as all options can be entered as command line arguments</li>
+</ul><p>v0.1.0:</p>
+
+<ul>
+<li> Alpha release - this version needs a settings.py to enter credentials.</li>
 </ul>
       </section>
     </div>

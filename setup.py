@@ -1,12 +1,10 @@
-import os
 from setuptools import setup, find_packages
+import os
 
-here = os.path.abspath(os.path.dirname(__file__))
-try:
-    README = open(os.path.join(here, 'README.md')).read()
-except:
-    README = """\
-Twitter Tap is a tool for collecting tweets to a mongoDB using the twitter search API. """
+import os
+long_description = 'Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered.'
+if os.path.exists('README.rst'):
+    long_description = open('README.rst').read()
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -21,9 +19,9 @@ CLASSIFIERS = [
 dist = setup(
     name='twitter-tap',
     version='1.0.0',
-    description='Collect tweets to a mongoDB using the Twitter search API.',
-    long_description=README,
     author='Janez Kranjc',
+    description='Collect tweets to a mongoDB using the Twitter search API.',
+    long_description=long_description,
     author_email='janez.kranjc@gmail.com',
     url='http://janezkranjc.github.io/twitter-tap/',
     license = 'MIT',

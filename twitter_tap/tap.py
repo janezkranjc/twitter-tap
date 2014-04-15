@@ -49,6 +49,8 @@ def main():
     parser.add_argument('-l', '--lang', type=unicode, dest='lang', help='Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort.\nExample value: eu')
     parser.add_argument('-r', '--result-type', '--result_type', type=unicode, default='mixed', dest='result_type', choices=["mixed","recent","popular"],help='Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response.')
     parser.add_argument('-d', '--db', type=unicode, dest='dburi', default='mongodb://localhost:27017/twitter', help='MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter')
+    parser.add_argument('-qc', '--queries-collection','--queries_collection', dest='queries_collection', type=unicode, default='queries', help='The name of the collection for storing the highest since_id for each query. Default is queries.')
+    parser.add_argument('-tc', '--tweets-collection','--tweets_collection', dest='tweets_collection', type=unicode, default='tweets', help='The name of the collection for storing tweets. Default is tweets.')
     parser.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')
     parser.add_argument('-w', '--wait', type=float, dest='waittime', default=2.0, help='Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached.')
     parser.add_argument('-c', '--clean', dest='clean', action='store_true', default=False, help="Set this switch to use a clean since_id.")
@@ -100,8 +102,8 @@ def main():
     parsed_dburi = pymongo.uri_parser.parse_uri(MONGODB_URI)
     db = client[parsed_dburi['database']]
 
-    queries = db.queries
-    tweets = db.tweets
+    queries = db[args.queries_collection]
+    tweets = db[args.tweets_collection]
 
     queries.ensure_index([("query",pymongo.ASCENDING),("geocode",pymongo.ASCENDING),("lang",pymongo.ASCENDING)],unique=True)
     tweets.ensure_index("id",direction=pymongo.DESCENDING,unique=True)

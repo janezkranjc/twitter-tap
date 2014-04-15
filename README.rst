@@ -83,6 +83,14 @@ secret.
 
     tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
 
+Where are the tweets stored?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The tweets are stored in the mongoDB in a collection called **tweets**. This can be changed
+using the --tweets-collection option. There is also a collection for saving the highest
+since_id for queries, which is **queries** by default (can be changed using
+the --queries-collection option).
+
 Running as a daemon
 ===================
 
@@ -165,3 +173,13 @@ Useful Links
 -  **Twitter developers** https://dev.twitter.com/
 -  **Supervisor** http://supervisord.org/
 
+Changes
+=======
+
+v1.1.0 (dev):
+
+-  Added two options for changing the default collection names for queries and tweets.
+
+v1.0.0: This version no longer reuires a separate settings.py file as all options can be entered as command line arguments
+
+v0.1.0: Alpha release - this version needs a settings.py to enter credentials.

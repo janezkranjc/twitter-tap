@@ -77,6 +77,8 @@ def main():
     parser_stream.add_argument('-t', '--track', type=unicode, dest='track', help='Keywords to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track')
     parser_stream.add_argument('-l', '--locations', type=unicode, dest='locations', help='A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations')
 
+    parser_stream.add_argument('-fh', '--firehose', action='store_true', default=False, dest='firehose', help="Use this option to receive all public tweets if there are not keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned.")
+
     #stream api auth specific
     parser_stream.add_argument('-ck', '--consumer-key', '--consumer_key', type=unicode, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
     parser_stream.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=unicode, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
@@ -178,7 +180,7 @@ def main():
             else:
                 logger.debug("Received "+str(len(statuses))+" tweets.")
 
-        logger.info("Starting...")
+        logger.info("Collecting tweets from the search API...")
 
         while True:
             results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,result_type=result_type)
@@ -202,7 +204,50 @@ def main():
             since_id = new_since_id
 
     if args.subcommand=='stream':
-        print "streaming..."
+        from twython import TwythonStreamer
+
+        loglevel = args.loglevel
+
+        logging.basicConfig(format=FORMAT,level=logging_dict[loglevel],stream=sys.stdout)
+        logger = logging.getLogger('twitter')
+
+        try:
+            client = pymongo.MongoClient(args.dburi)
+        except:
+            logger.fatal("Couldn't connect to MongoDB. Please check your --db argument settings.")
+            sys.exit(1)
+
+        parsed_dburi = pymongo.uri_parser.parse_uri(args.dburi)
+        db = client[parsed_dburi['database']]
+
+        tweets = db[args.tweets_collection]
+
+        tweets.ensure_index("id",direction=pymongo.DESCENDING,unique=True)
+        tweets.ensure_index([("coordinates.coordinates",pymongo.GEO2D),])        
+
+        class TapStreamer(TwythonStreamer):
+            def on_success(self, data):
+                if 'text' in data:
+                    data['created_at']=parse_datetime(data['created_at'])
+                    try:
+                        tweets.insert(data)
+                    except:
+                        logger.error("Couldn't save a tweet.")
+                if 'limit' in data:
+                    logger.warn("The filtered stream has matched more Tweets than its current rate limit allows it to be delivered.")
+            def on_error(self, status_code, data):
+                logger.error("Received error code "+str(status_code)+".")
+
+        stream = TapStreamer(args.consumer_key, args.consumer_secret, args.access_token, args.access_token_secret)
+
+        logger.info("Collecting tweets from the streaming API...")
+
+        if args.follow or args.track or args.locations:
+            stream.statuses.filter(follow=args.follow,track=args.track,locations=args.locations)
+        elif args.firehose:
+            stream.statuses.firehose()
+        else:
+            stream.statuses.sample()
 
 if __name__ == "__main__":
     main()

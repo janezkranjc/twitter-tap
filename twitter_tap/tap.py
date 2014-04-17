@@ -77,13 +77,13 @@ def main():
     parser_stream.add_argument('-t', '--track', type=unicode, dest='track', help='Keywords to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track')
     parser_stream.add_argument('-l', '--locations', type=unicode, dest='locations', help='A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations')
 
-    parser_stream.add_argument('-fh', '--firehose', action='store_true', default=False, dest='firehose', help="Use this option to receive all public tweets if there are not keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned.")
+    parser_stream.add_argument('-fh', '--firehose', action='store_true', default=False, dest='firehose', help="Use this option to receive all public tweets if there are no keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned.")
 
     #stream api auth specific
     parser_stream.add_argument('-ck', '--consumer-key', '--consumer_key', type=unicode, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
     parser_stream.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=unicode, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
     parser_stream.add_argument('-at', '--access-token', '--access_token', type=unicode, dest='access_token', help="You can generate your user access token at http://apps.twitter.com by clicking 'Create my access token'.")    
-    parser_stream.add_argument('-ats', '--access-token-secret', '--access_token_secret', type=unicode, dest='access_token_secret', help="You can generate your user access token at http://apps.twitter.com by clicking 'Create my access token'.")
+    parser_stream.add_argument('-ats', '--access-token-secret', '--access_token_secret', type=unicode, dest='access_token_secret', help="You can generate your user access token secret at http://apps.twitter.com by clicking 'Create my access token'.")
 
     parser_stream.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')    
 

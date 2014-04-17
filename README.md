@@ -88,6 +88,22 @@ To execute a query you must provide a **query**, the **consumer secret** and eit
 tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track "miley cyrus" -v DEBUG
 ```
 
+Streaming options:
+
+| Option | Description
+|--------|--------------------|
+| --db   | MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter |
+| --tweets-collection | The name of the collection for storing tweets. Default is tweets. |
+| --follow | A comma separated list of user IDs, indicating the users to return statuses for in the stream. More information at https://dev.twitter.com/docs/streaming-apis/parameters#follow |
+| --track | A comma separated list of keywords or phrases to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track |
+| --locations | A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations |
+| --firehose | Use this option to receive all public tweets if there are no keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned. |
+| --consumer-key | The consumer key that you obtain when you create an app at https://apps.twitter.com/ |
+| --consumer-secret | The consumer secret that you obtain when you create an app at https://apps.twitter.com/ |
+| --access-token | You can generate your user access token at http://apps.twitter.com by clicking 'Create my access token'. |
+| --access-token-secret | You can generate your user access token secret at http://apps.twitter.com by clicking 'Create my access token'. |
+| --verbosity | The level of verbosity. (DEBUG, INFO, WARN, ERROR, CRITICAL, FATAL) |
+
 ### Where are the tweets stored ###
 
 The tweets are stored in the mongoDB in a collection called **tweets**. This can be changed using the --tweets-collection option. There is also a collection for saving the highest since_id for queries, which is **queries** by default (can be changed using the --queries-collection option).

@@ -135,7 +135,7 @@ supervisorctl shutdown
 
 # Changes #
 
-v1.1.0 (dev):
+v1.1.0:
 
 -  Added two options for changing the default collection names for queries and tweets.
 

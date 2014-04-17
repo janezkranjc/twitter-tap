@@ -45,12 +45,47 @@ tap
 tap -h
 ```
 
-### Executing a query ###
+```bash
+tap search -h
+```
+
+```bash
+tap stream -h
+```
+
+### Executing a query with the search API ###
 
 To execute a query you must provide a **query**, the **consumer secret** and either the **consumer key** or the access token. Consumer key and secret can be obtained at the http://apps.twitter.com/ website, while the access token will be obtained when first connecting with the key and secret.
 
 ```bash
-tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
+tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
+```
+
+Search options:
+
+| Option                 | Description                                                                                                                                                                                                                 |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --query                | A UTF-8 search query of 1,000 characters maximum, including operators. Queries may additionally be limited by complexity. Information on how to construct a query is available at https://dev.twitter.com/docs/using-search |
+| --geocode              | Returns tweets by users located within a given radius of the given latitude/longitude. The location is preferentially taking from the Geotagging API, but will fall back to their Twitter profile. The parameter value is specified by "latitude,longitude,radius", where radius units must be specified as either "mi" (miles) or "km" (kilometers). Note that you cannot use the near operator via the API to geocode arbitrary locations; however you can use this geocode parameter to search near geocodes directly. A maximum of 1,000 distinct "sub-regions" will be considered when using the radius modifier. Example value: 37.781157,-122.398720,1mi |
+| --lang                 | Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort. Example value: eu |
+| --result-type          | Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response. |
+| --wait                 | Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached. |
+| --clean                | Set this switch to use a clean since_id. |
+| --consumer-key         | The consumer key that you obtain when you create an app at https://apps.twitter.com/ |
+| --consumer-secret      | The consumer secret that you obtain when you create an app at https://apps.twitter.com/ |
+| --access-token         | You can use consumer_key and access_token instead of consumer_key and consumer_secret. This will make authentication faster, as the token will not be fetched. The access token will be printed to the standard output when connecting with the consumer_key and consumer_secret. |
+| --db                   | MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter |
+| --queries-collection   | The name of the collection for storing the highest since_id for each query. Default is queries. |
+| --tweets-collection    | The name of the collection for storing tweets. Default is tweets. |
+| --verbosity            | The level of verbosity. (DEBUG, INFO, WARN, ERROR, CRITICAL, FATAL) |
+
+
+### Executing a query with the streaming API ###
+
+To execute a query you must provide a **query**, the **consumer secret** and either the **consumer key** or the access token. Consumer key and secret can be obtained at the http://apps.twitter.com/ website, while the access token will be obtained when first connecting with the key and secret.
+
+```bash
+tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track "miley cyrus" -v DEBUG
 ```
 
 ### Where are the tweets stored ###
@@ -90,14 +125,24 @@ serverurl=http://127.0.0.1:9001 ; use an http:// url to specify an inet socket
 username=manorastroman       ; should be same as http_username if set
 password=kingofthedragonmen  ; should be same as http_password if set
 
-[program:tap]
-command=tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "janez kranjc" -v DEBUG
-stdout_logfile=tap.log
+[program:tapsearch]
+command=tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
+stdout_logfile=tap_search.log
 stderr_logfile=tap_err.log
 autostart=true
 autorestart=true
 startsecs=10
 stopwaitsecs=10
+
+[program:tapstream]
+command=tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track "miley cyrus" -v DEBUG
+stdout_logfile=tap_stream.log
+stderr_logfile=tap_stream_err.log
+autostart=true
+autorestart=true
+startsecs=10
+stopwaitsecs=10
+
 ```
 
 Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)
@@ -118,7 +163,11 @@ supervisorctl status
 Or see the tail of the logs (log file locations can be setup in supervisord.conf)
 
 ```bash
-supervisorctl tail tap
+supervisorctl tail tapsearch
+```
+
+```bash
+supervisorctl tail tapstream
 ```
 
 Whenever you feel like shutting it down
@@ -134,6 +183,10 @@ supervisorctl shutdown
 - **Supervisor** http://supervisord.org/
 
 # Changes #
+
+v2.0.0:
+
+- This version now uses two commands - **search** and **stream**, to use either with the search API or the streaming API (on version 1.1.0 you could only use the search API).
 
 v1.1.0:
 

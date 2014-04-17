@@ -6,6 +6,8 @@ Collect tweets to a mongoDB using the twitter search API.
 
 Twitter Tap is a python tool that connects to the Twitter API and issues calls to the **search endpoint** or the **streaming API** using a query that the user has entered. 
 
+## Using the search API ##
+
 If using the search API, the tool follows all the **next_results** links (with the corresponding **max_id**) so that all results are collected. When all the **next_results** links are exhausted the query is repeated using the **since_id** of the latest tweet from the results of the first query and follows all the **next_results** links again. The latest **since_id** is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.
 
 Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so that there is no duplication of data if more than 1 query is executed simultaneously.
@@ -13,6 +15,10 @@ Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so th
 There is an arbitrary wait time before each API call so that the rate limit is not reached. The default value of 2 seconds makes sure that there are no more than 450 requests per 15 minutes as is the rate limit of the search endpoint for authenticating with the app (not the user).
 
 The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.
+
+## Using the streaming API ##
+
+You can also use the streaming API to store tweets. Storing tweets from the streaming API is much more straightforward, but you can only get the tweets you are currently streaming. Using the search API will also get you tweets from a couple of days back. Check out the documentation so that you can see what sorts of queries you can make with the search API vs the streaming API.
 
 # Installation #
 

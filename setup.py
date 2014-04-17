@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 import os
-long_description = 'Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered.'
+long_description = 'Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search or the streaming endpoint using a query that the user has entered.'
 if os.path.exists('README.rst'):
     long_description = open('README.rst').read()
 
@@ -18,9 +18,9 @@ CLASSIFIERS = [
 
 dist = setup(
     name='twitter-tap',
-    version='1.1.0-dev',
+    version='2.0.0-dev',
     author='Janez Kranjc',
-    description='Collect tweets to a mongoDB using the Twitter search API.',
+    description='Collect tweets to a mongoDB using either the Twitter search API or the streaming API.',
     long_description=long_description,
     author_email='janez.kranjc@gmail.com',
     url='http://janezkranjc.github.io/twitter-tap/',

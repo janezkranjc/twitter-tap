@@ -39,13 +39,23 @@
 <h1>
 <a name="about-twitter-tap" class="anchor" href="#about-twitter-tap"><span class="octicon octicon-link"></span></a>About Twitter Tap</h1>
 
-<p>Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search endpoint using a query that the user has entered. The tool follows all the <strong>next_results</strong> links (with the corresponding <strong>max_id</strong>) so that all results are collected. When all the <strong>next_results</strong> links are exhausted the query is repeated using the <strong>since_id</strong> of the latest tweet from the results of the first query and follows all the <strong>next_results</strong> links again. The latest <strong>since_id</strong> is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.</p>
+<p>Twitter Tap is a python tool that connects to the Twitter API and issues calls to the <strong>search endpoint</strong> or the <strong>streaming API</strong> using a query that the user has entered. </p>
+
+<h2>
+<a name="using-the-search-api" class="anchor" href="#using-the-search-api"><span class="octicon octicon-link"></span></a>Using the search API</h2>
+
+<p>If using the search API, the tool follows all the <strong>next_results</strong> links (with the corresponding <strong>max_id</strong>) so that all results are collected. When all the <strong>next_results</strong> links are exhausted the query is repeated using the <strong>since_id</strong> of the latest tweet from the results of the first query and follows all the <strong>next_results</strong> links again. The latest <strong>since_id</strong> is also stored in the database for each distinct query (query, geolocation, language), so that when the tool is restarted you will still only receive unique tweets.</p>
 
 <p>Tweets are stored into a mongoDB, which has a unique index on the Tweet ID so that there is no duplication of data if more than 1 query is executed simultaneously.</p>
 
 <p>There is an arbitrary wait time before each API call so that the rate limit is not reached. The default value of 2 seconds makes sure that there are no more than 450 requests per 15 minutes as is the rate limit of the search endpoint for authenticating with the app (not the user).</p>
 
 <p>The tool can be run from the command line or be run as a daemon using supervisor (recommended). A sample supervisord.conf script is included with the tool.</p>
+
+<h2>
+<a name="using-the-streaming-api" class="anchor" href="#using-the-streaming-api"><span class="octicon octicon-link"></span></a>Using the streaming API</h2>
+
+<p>You can also use the streaming API to store tweets. Storing tweets from the streaming API is much more straightforward, but you can only get the tweets you are currently streaming. Using the search API will also get you tweets from a couple of days back. Check out the documentation so that you can see what sorts of queries you can make with the search API vs the streaming API.</p>
 
 <h1>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
@@ -81,15 +91,151 @@ python setup.py install
 <div class="highlight highlight-bash"><pre>tap -h
 </pre></div>
 
-<h3>
-<a name="executing-a-query" class="anchor" href="#executing-a-query"><span class="octicon octicon-link"></span></a>Executing a query</h3>
+<div class="highlight highlight-bash"><pre>tap search -h
+</pre></div>
 
-<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong> and either the <strong>consumer key</strong> or the access token. Consumer key and secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while the access token will be obtained when first connecting with the key and secret.</p>
-
-<div class="highlight highlight-bash"><pre>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"miley cyrus"</span> -v DEBUG
+<div class="highlight highlight-bash"><pre>tap stream -h
 </pre></div>
 
 <h3>
+<a name="executing-a-query-with-the-search-api" class="anchor" href="#executing-a-query-with-the-search-api"><span class="octicon octicon-link"></span></a>Executing a query with the search API</h3>
+
+<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong> and either the <strong>consumer key</strong> or the access token. Consumer key and secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while the access token will be obtained when first connecting with the key and secret.</p>
+
+<div class="highlight highlight-bash"><pre>tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"miley cyrus"</span> -v DEBUG
+</pre></div>
+
+<p>Search options:</p>
+
+<table>
+<thead><tr>
+<th>Option</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>--query</td>
+<td>A UTF-8 search query of 1,000 characters maximum, including operators. Queries may additionally be limited by complexity. Information on how to construct a query is available at <a href="https://dev.twitter.com/docs/using-search">https://dev.twitter.com/docs/using-search</a>
+</td>
+</tr>
+<tr>
+<td>--geocode</td>
+<td>Returns tweets by users located within a given radius of the given latitude/longitude. The location is preferentially taking from the Geotagging API, but will fall back to their Twitter profile. The parameter value is specified by "latitude,longitude,radius", where radius units must be specified as either "mi" (miles) or "km" (kilometers). Note that you cannot use the near operator via the API to geocode arbitrary locations; however you can use this geocode parameter to search near geocodes directly. A maximum of 1,000 distinct "sub-regions" will be considered when using the radius modifier. Example value: 37.781157,-122.398720,1mi</td>
+</tr>
+<tr>
+<td>--lang</td>
+<td>Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort. Example value: eu</td>
+</tr>
+<tr>
+<td>--result-type</td>
+<td>Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response.</td>
+</tr>
+<tr>
+<td>--wait</td>
+<td>Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached.</td>
+</tr>
+<tr>
+<td>--clean</td>
+<td>Set this switch to use a clean since_id.</td>
+</tr>
+<tr>
+<td>--consumer-key</td>
+<td>The consumer key that you obtain when you create an app at <a href="https://apps.twitter.com/">https://apps.twitter.com/</a>
+</td>
+</tr>
+<tr>
+<td>--consumer-secret</td>
+<td>The consumer secret that you obtain when you create an app at <a href="https://apps.twitter.com/">https://apps.twitter.com/</a>
+</td>
+</tr>
+<tr>
+<td>--access-token</td>
+<td>You can use consumer_key and access_token instead of consumer_key and consumer_secret. This will make authentication faster, as the token will not be fetched. The access token will be printed to the standard output when connecting with the consumer_key and consumer_secret.</td>
+</tr>
+<tr>
+<td>--db</td>
+<td>MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter</td>
+</tr>
+<tr>
+<td>--queries-collection</td>
+<td>The name of the collection for storing the highest since_id for each query. Default is queries.</td>
+</tr>
+<tr>
+<td>--tweets-collection</td>
+<td>The name of the collection for storing tweets. Default is tweets.</td>
+</tr>
+<tr>
+<td>--verbosity</td>
+<td>The level of verbosity. (DEBUG, INFO, WARN, ERROR, CRITICAL, FATAL)</td>
+</tr>
+</tbody>
+</table><h3>
+<a name="executing-a-query-with-the-streaming-api" class="anchor" href="#executing-a-query-with-the-streaming-api"><span class="octicon octicon-link"></span></a>Executing a query with the streaming API</h3>
+
+<p>To execute a query you must provide a <strong>query</strong>, the <strong>consumer secret</strong> and either the <strong>consumer key</strong> or the access token. Consumer key and secret can be obtained at the <a href="http://apps.twitter.com/">http://apps.twitter.com/</a> website, while the access token will be obtained when first connecting with the key and secret.</p>
+
+<div class="highlight highlight-bash"><pre>tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track <span class="s2">"miley cyrus"</span> -v DEBUG
+</pre></div>
+
+<p>Streaming options:</p>
+
+<table>
+<thead><tr>
+<th>Option</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>--db</td>
+<td>MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter</td>
+</tr>
+<tr>
+<td>--tweets-collection</td>
+<td>The name of the collection for storing tweets. Default is tweets.</td>
+</tr>
+<tr>
+<td>--follow</td>
+<td>A comma separated list of user IDs, indicating the users to return statuses for in the stream. More information at <a href="https://dev.twitter.com/docs/streaming-apis/parameters#follow">https://dev.twitter.com/docs/streaming-apis/parameters#follow</a>
+</td>
+</tr>
+<tr>
+<td>--track</td>
+<td>A comma separated list of keywords or phrases to track. Phrases of keywords are specified by a comma-separated list. More information at <a href="https://dev.twitter.com/docs/streaming-apis/parameters#track">https://dev.twitter.com/docs/streaming-apis/parameters#track</a>
+</td>
+</tr>
+<tr>
+<td>--locations</td>
+<td>A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at <a href="https://dev.twitter.com/docs/streaming-apis/parameters#locations">https://dev.twitter.com/docs/streaming-apis/parameters#locations</a>
+</td>
+</tr>
+<tr>
+<td>--firehose</td>
+<td>Use this option to receive all public tweets if there are no keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned.</td>
+</tr>
+<tr>
+<td>--consumer-key</td>
+<td>The consumer key that you obtain when you create an app at <a href="https://apps.twitter.com/">https://apps.twitter.com/</a>
+</td>
+</tr>
+<tr>
+<td>--consumer-secret</td>
+<td>The consumer secret that you obtain when you create an app at <a href="https://apps.twitter.com/">https://apps.twitter.com/</a>
+</td>
+</tr>
+<tr>
+<td>--access-token</td>
+<td>You can generate your user access token at <a href="http://apps.twitter.com">http://apps.twitter.com</a> by clicking 'Create my access token'.</td>
+</tr>
+<tr>
+<td>--access-token-secret</td>
+<td>You can generate your user access token secret at <a href="http://apps.twitter.com">http://apps.twitter.com</a> by clicking 'Create my access token'.</td>
+</tr>
+<tr>
+<td>--verbosity</td>
+<td>The level of verbosity. (DEBUG, INFO, WARN, ERROR, CRITICAL, FATAL)</td>
+</tr>
+</tbody>
+</table><h3>
 <a name="where-are-the-tweets-stored" class="anchor" href="#where-are-the-tweets-stored"><span class="octicon octicon-link"></span></a>Where are the tweets stored</h3>
 
 <p>The tweets are stored in the mongoDB in a collection called <strong>tweets</strong>. This can be changed using the --tweets-collection option. There is also a collection for saving the highest since_id for queries, which is <strong>queries</strong> by default (can be changed using the --queries-collection option).</p>
@@ -127,14 +273,24 @@ supervisor.rpcinterface_factory <span class="o">=</span> supervisor.rpcinterface
 <span class="nv">username</span><span class="o">=</span>manorastroman       <span class="p">;</span> should be same as http_username <span class="k">if </span><span class="nb">set</span>
 <span class="nv">password</span><span class="o">=</span>kingofthedragonmen  <span class="p">;</span> should be same as http_password <span class="k">if </span><span class="nb">set</span>
 
-<span class="o">[</span>program:tap<span class="o">]</span>
-<span class="nb">command</span><span class="o">=</span>tap --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"janez kranjc"</span> -v DEBUG
-<span class="nv">stdout_logfile</span><span class="o">=</span>tap.log
+<span class="o">[</span>program:tapsearch<span class="o">]</span>
+<span class="nb">command</span><span class="o">=</span>tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q <span class="s2">"miley cyrus"</span> -v DEBUG
+<span class="nv">stdout_logfile</span><span class="o">=</span>tap_search.log
 <span class="nv">stderr_logfile</span><span class="o">=</span>tap_err.log
 <span class="nv">autostart</span><span class="o">=</span><span class="nb">true</span>
 <span class="nv">autorestart</span><span class="o">=</span><span class="nb">true</span>
 <span class="nv">startsecs</span><span class="o">=</span>10
 <span class="nv">stopwaitsecs</span><span class="o">=</span>10
+
+<span class="o">[</span>program:tapstream<span class="o">]</span>
+<span class="nb">command</span><span class="o">=</span>tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track <span class="s2">"miley cyrus"</span> -v DEBUG
+<span class="nv">stdout_logfile</span><span class="o">=</span>tap_stream.log
+<span class="nv">stderr_logfile</span><span class="o">=</span>tap_stream_err.log
+<span class="nv">autostart</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">autorestart</span><span class="o">=</span><span class="nb">true</span>
+<span class="nv">startsecs</span><span class="o">=</span>10
+<span class="nv">stopwaitsecs</span><span class="o">=</span>10
+
 </pre></div>
 
 <p>Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)</p>
@@ -152,7 +308,10 @@ By default the username is manorastroman and the password kingofthedragonmen.</p
 
 <p>Or see the tail of the logs (log file locations can be setup in supervisord.conf)</p>
 
-<div class="highlight highlight-bash"><pre>supervisorctl tail tap
+<div class="highlight highlight-bash"><pre>supervisorctl tail tapsearch
+</pre></div>
+
+<div class="highlight highlight-bash"><pre>supervisorctl tail tapstream
 </pre></div>
 
 <p>Whenever you feel like shutting it down</p>
@@ -176,7 +335,11 @@ By default the username is manorastroman and the password kingofthedragonmen.</p
 </ul><h1>
 <a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h1>
 
-<p>v1.1.0 (dev):</p>
+<p>v2.0.0:</p>
+
+<ul>
+<li>This version now uses two commands - <strong>search</strong> and <strong>stream</strong>, to use either with the search API or the streaming API (on version 1.1.0 you could only use the search API).</li>
+</ul><p>v1.1.0:</p>
 
 <ul>
 <li> Added two options for changing the default collection names for queries and tweets.</li>

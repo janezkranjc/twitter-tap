@@ -215,6 +215,10 @@ def main():
         logging.basicConfig(format=FORMAT,level=logging_dict[loglevel],stream=sys.stdout)
         logger = logging.getLogger('twitter')
 
+        if args.consumer_key is None or args.consumer_secret is None or args.access_token is None or args.access_token_secret is None:
+            logger.fatal("Consumer key, consumer secret, access token and access token secret are all required when using the streaming API.")
+            sys.exit(1)
+
         try:
             client = pymongo.MongoClient(args.dburi)
         except:

@@ -173,6 +173,10 @@ def main():
         def save_tweets(statuses):
             for status in statuses:
                 status['created_at']=parse_datetime(status['created_at'])
+                try:
+                    status['user']['created_at']=parse_datetime(status['user']['created_at'])
+                except:
+                    pass                
                 tweets.update({'id':status['id']},status,upsert=True)
             if len(statuses)==0:
                 logger.debug("No new tweets. Taking a break for 10 seconds...")
@@ -229,6 +233,10 @@ def main():
             def on_success(self, data):
                 if 'text' in data:
                     data['created_at']=parse_datetime(data['created_at'])
+                    try:
+                        data['user']['created_at']=parse_datetime(data['user']['created_at'])
+                    except:
+                        pass
                     try:
                         tweets.insert(data)
                     except:

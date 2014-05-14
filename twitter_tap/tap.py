@@ -170,19 +170,24 @@ def main():
                     continue
                 return results
 
-        def save_tweets(statuses):
+        def save_tweets(statuses,current_since_id):
             for status in statuses:
                 status['created_at']=parse_datetime(status['created_at'])
                 try:
                     status['user']['created_at']=parse_datetime(status['user']['created_at'])
                 except:
-                    pass                
+                    pass
                 tweets.update({'id':status['id']},status,upsert=True)
+                current_id = long(status['id'])
+                if current_id>current_since_id:
+                    current_since_id = current_id
+
             if len(statuses)==0:
                 logger.debug("No new tweets. Taking a break for 10 seconds...")
                 sleep(10)
             else:
                 logger.debug("Received "+str(len(statuses))+" tweets.")
+            return current_since_id
 
         logger.info("Collecting tweets from the search API...")
 
@@ -191,10 +196,14 @@ def main():
 
             refresh_url = results['search_metadata'].get('refresh_url')
             p = urlparse.urlparse(refresh_url)
-            new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
-            queries.update({'query':query,'geocode':geocode,'lang':lang},{"$set":{'since_id':new_since_id}},upsert=True)
+            # we will now compute the new since_id as the maximum of all returned ids
+            #new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
             logger.debug("Rate limit for current window: "+str(twitter.get_lastfunction_header(header="x-rate-limit-remaining")))
-            save_tweets(results['statuses'])
+            if since_id:
+                current_since_id = long(since_id)
+            else:
+                current_since_id = 0
+            new_since_id = save_tweets(results['statuses'],current_since_id)
 
             next_results = results['search_metadata'].get('next_results')
             while next_results:
@@ -203,8 +212,10 @@ def main():
                 results = perform_query(q=query,geocode=geocode,lang=lang,count=100,since_id=since_id,max_id=next_results_max_id,result_type=result_type)
                 next_results = results['search_metadata'].get('next_results')
                 logger.debug("Rate limit for current window: "+str(twitter.get_lastfunction_header(header="x-rate-limit-remaining")))
-                save_tweets(results['statuses'])
+                new_since_id = save_tweets(results['statuses'],new_since_id)
 
+            new_since_id = str(new_since_id)
+            queries.update({'query':query,'geocode':geocode,'lang':lang},{"$set":{'since_id':new_since_id}},upsert=True)
             since_id = new_since_id
 
     if args.subcommand=='stream':

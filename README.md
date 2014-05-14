@@ -208,6 +208,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.1:
+
+- Fixed a bug where search results would fail to retreive tweets due to invalid since_id. The since_id is now manually computed.
+
 v2.0.0:
 
 - This version now uses two commands - **search** and **stream**, to use either with the search API or the streaming API (on version 1.1.0 you could only use the search API).

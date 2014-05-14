@@ -335,7 +335,11 @@ By default the username is manorastroman and the password kingofthedragonmen.</p
 </ul><h1>
 <a name="changes" class="anchor" href="#changes"><span class="octicon octicon-link"></span></a>Changes</h1>
 
-<p>v2.0.0:</p>
+<p>v2.0.1:</p>
+
+<ul>
+<li>Fixed a bug where search results would fail to retreive tweets due to invalid since_id. The since_id is now manually computed.</li>
+</ul><p>v2.0.0:</p>
 
 <ul>
 <li>This version now uses two commands - <strong>search</strong> and <strong>stream</strong>, to use either with the search API or the streaming API (on version 1.1.0 you could only use the search API).</li>

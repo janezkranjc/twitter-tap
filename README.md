@@ -208,6 +208,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.2:
+
+- More informative errors on saving streaming tweets.
+
 v2.0.1:
 
 - Fixed a bug where search results would fail to retreive tweets due to invalid since_id. The since_id is now manually computed.

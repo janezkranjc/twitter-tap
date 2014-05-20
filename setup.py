@@ -4,7 +4,7 @@ import os
 import os
 long_description = 'Twitter Tap is a python tool that connects to the Twitter API and issues calls to the search or the streaming endpoint using a query that the user has entered.'
 if os.path.exists('README.rst'):
-    long_description = open('README.rst').read()
+    long_description = open('README.md').read()
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -18,7 +18,7 @@ CLASSIFIERS = [
 
 dist = setup(
     name='twitter-tap',
-    version='2.0.1',
+    version='2.0.2',
     author='Janez Kranjc',
     description='Collect tweets to a mongoDB using either the Twitter search API or the streaming API.',
     long_description=long_description,

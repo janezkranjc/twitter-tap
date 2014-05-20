@@ -254,8 +254,9 @@ def main():
                         pass
                     try:
                         tweets.insert(data)
-                    except:
-                        logger.error("Couldn't save a tweet.")
+                    except Exception as e:
+                        exc_type, exc_obj, exc_tb = sys.exc_info()
+                        logger.error("Couldn't save a tweet: "+str(exc_obj))
                 if 'limit' in data:
                     logger.warn("The filtered stream has matched more Tweets than its current rate limit allows it to be delivered.")
             def on_error(self, status_code, data):

@@ -1,6 +1,6 @@
 # Twitter Tap #
 
-Collect tweets to a mongoDB using the twitter search API. If you want to save tweets using a graphical interface try (Tweetset)[http://github.com/janezkranjc/tweetset].
+Collect tweets to a mongoDB using the twitter search API. If you want to save tweets using a graphical interface try [Tweetset](http://github.com/janezkranjc/tweetset).
 
 # About Twitter Tap #
 

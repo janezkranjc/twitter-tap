@@ -202,6 +202,7 @@ supervisorctl shutdown
 
 # Useful links #
 
+- **TweetSet** (for saving tweets to a relational database using a web interface) https://github.com/janezkranjc/tweetset
 - **MongoDB** https://www.mongodb.org/
 - **Twitter developers** https://dev.twitter.com/
 - **Supervisor** http://supervisord.org/

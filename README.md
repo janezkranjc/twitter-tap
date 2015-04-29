@@ -209,6 +209,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.3:
+
+- Added support for Python3.
+
 v2.0.2:
 
 - More informative errors on saving streaming tweets.

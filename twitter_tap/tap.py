@@ -6,7 +6,13 @@ import sys
 import argparse
 from time import sleep
 import signal
-import urlparse
+import six
+if six.PY2:
+    import urlparse
+    longtype = six.integer_types[1]
+if six.PY3:
+    import urllib.parse as urlparse
+    longtype = six.integer_types
 from datetime import datetime
 from email.utils import parsedate
 
@@ -47,45 +53,45 @@ def main():
     subparsers = parser.add_subparsers(dest='subcommand',help='Use either search or stream for acquiring tweets. For help with these commands please enter "tap stream help" or "tap search help".')
     parser_search = subparsers.add_parser('search', help='In order to run this you must provide a query or a geocode, the consumer secret and either the consumer key or the access token. Consumer key and secret can be obtained at the http://apps.twitter.com/ website, while the access token will be obtained when first connecting with the key and secret.')
     #search specific arguments
-    parser_search.add_argument('-q', '--query', type=unicode, dest='query', default="", help='A UTF-8 search query of 1,000 characters maximum, including operators. Queries may additionally be limited by complexity. Information on how to construct a query is available at https://dev.twitter.com/docs/using-search')
-    parser_search.add_argument('-g', '--geocode', type=unicode, dest='geocode', help='Returns tweets by users located within a given radius of the given latitude/longitude. The location is preferentially taking from the Geotagging API, but will fall back to their Twitter profile. The parameter value is specified by "latitude,longitude,radius", where radius units must be specified as either "mi" (miles) or "km" (kilometers). Note that you cannot use the near operator via the API to geocode arbitrary locations; however you can use this geocode parameter to search near geocodes directly. A maximum of 1,000 distinct "sub-regions" will be considered when using the radius modifier. Example value: 37.781157,-122.398720,1mi')
-    parser_search.add_argument('-l', '--lang', type=unicode, dest='lang', help='Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort.\nExample value: eu')
-    parser_search.add_argument('-r', '--result-type', '--result_type', type=unicode, default='mixed', dest='result_type', choices=["mixed","recent","popular"],help='Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response.')
+    parser_search.add_argument('-q', '--query', type=six.text_type, dest='query', default="", help='A UTF-8 search query of 1,000 characters maximum, including operators. Queries may additionally be limited by complexity. Information on how to construct a query is available at https://dev.twitter.com/docs/using-search')
+    parser_search.add_argument('-g', '--geocode', type=six.text_type, dest='geocode', help='Returns tweets by users located within a given radius of the given latitude/longitude. The location is preferentially taking from the Geotagging API, but will fall back to their Twitter profile. The parameter value is specified by "latitude,longitude,radius", where radius units must be specified as either "mi" (miles) or "km" (kilometers). Note that you cannot use the near operator via the API to geocode arbitrary locations; however you can use this geocode parameter to search near geocodes directly. A maximum of 1,000 distinct "sub-regions" will be considered when using the radius modifier. Example value: 37.781157,-122.398720,1mi')
+    parser_search.add_argument('-l', '--lang', type=six.text_type, dest='lang', help='Restricts tweets to the given language, given by an ISO 639-1 code. Language detection is best-effort.\nExample value: eu')
+    parser_search.add_argument('-r', '--result-type', '--result_type', type=six.text_type, default='mixed', dest='result_type', choices=["mixed","recent","popular"],help='Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response.')
     parser_search.add_argument('-w', '--wait', type=float, dest='waittime', default=2.0, help='Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached.')
     parser_search.add_argument('-c', '--clean', dest='clean', action='store_true', default=False, help="Set this switch to use a clean since_id.")    
 
     #search api auth specific
-    parser_search.add_argument('-ck', '--consumer-key', '--consumer_key', type=unicode, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
-    parser_search.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=unicode, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
-    parser_search.add_argument('-at', '--access-token', '--access_token', type=unicode, dest='access_token', help="You can use consumer_key and access_token instead of consumer_key and consumer_secret. This will make authentication faster, as the token will not be fetched. The access token will be printed to the standard output when connecting with the consumer_key and consumer_secret.")    
+    parser_search.add_argument('-ck', '--consumer-key', '--consumer_key', type=six.text_type, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
+    parser_search.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=six.text_type, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
+    parser_search.add_argument('-at', '--access-token', '--access_token', type=six.text_type, dest='access_token', help="You can use consumer_key and access_token instead of consumer_key and consumer_secret. This will make authentication faster, as the token will not be fetched. The access token will be printed to the standard output when connecting with the consumer_key and consumer_secret.")    
 
     #mongoDB specific arguments
-    parser_search.add_argument('-d', '--db', type=unicode, dest='dburi', default='mongodb://localhost:27017/twitter', help='MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter')
-    parser_search.add_argument('-qc', '--queries-collection','--queries_collection', dest='queries_collection', type=unicode, default='queries', help='The name of the collection for storing the highest since_id for each query. Default is queries.')
-    parser_search.add_argument('-tc', '--tweets-collection','--tweets_collection', dest='tweets_collection', type=unicode, default='tweets', help='The name of the collection for storing tweets. Default is tweets.')
+    parser_search.add_argument('-d', '--db', type=six.text_type, dest='dburi', default='mongodb://localhost:27017/twitter', help='MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter')
+    parser_search.add_argument('-qc', '--queries-collection','--queries_collection', dest='queries_collection', type=six.text_type, default='queries', help='The name of the collection for storing the highest since_id for each query. Default is queries.')
+    parser_search.add_argument('-tc', '--tweets-collection','--tweets_collection', dest='tweets_collection', type=six.text_type, default='tweets', help='The name of the collection for storing tweets. Default is tweets.')
     
-    parser_search.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')    
+    parser_search.add_argument('-v', '--verbosity', type=six.text_type, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')    
 
     parser_stream = subparsers.add_parser('stream', help='Obtain tweets using the streaming API. If you do not provide any arguments, the sample stream will be tracked. For a personalized stream at least one of the following must be entered: follow, track, or locations. The default access level allows up to 400 track keywords, 5,000 follow userids and 25 0.1-360 degree location boxes.')
 
     #mongoDB specific arguments
-    parser_stream.add_argument('-d', '--db', type=unicode, dest='dburi', default='mongodb://localhost:27017/twitter', help='MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter')
-    parser_stream.add_argument('-tc', '--tweets-collection','--tweets_collection', dest='tweets_collection', type=unicode, default='tweets', help='The name of the collection for storing tweets. Default is tweets.')
+    parser_stream.add_argument('-d', '--db', type=six.text_type, dest='dburi', default='mongodb://localhost:27017/twitter', help='MongoDB URI, example: mongodb://dbuser:dbpassword@localhost:27017/dbname Defaults to mongodb://localhost:27017/twitter')
+    parser_stream.add_argument('-tc', '--tweets-collection','--tweets_collection', dest='tweets_collection', type=six.text_type, default='tweets', help='The name of the collection for storing tweets. Default is tweets.')
 
     #stream api specific
-    parser_stream.add_argument('-f', '--follow', type=unicode, dest='follow', help='A comma separated list of user IDs, indicating the users to return statuses for in the stream. More information at https://dev.twitter.com/docs/streaming-apis/parameters#follow')
-    parser_stream.add_argument('-t', '--track', type=unicode, dest='track', help='Keywords to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track')
-    parser_stream.add_argument('-l', '--locations', type=unicode, dest='locations', help='A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations')
+    parser_stream.add_argument('-f', '--follow', type=six.text_type, dest='follow', help='A comma separated list of user IDs, indicating the users to return statuses for in the stream. More information at https://dev.twitter.com/docs/streaming-apis/parameters#follow')
+    parser_stream.add_argument('-t', '--track', type=six.text_type, dest='track', help='Keywords to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track')
+    parser_stream.add_argument('-l', '--locations', type=six.text_type, dest='locations', help='A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations')
 
     parser_stream.add_argument('-fh', '--firehose', action='store_true', default=False, dest='firehose', help="Use this option to receive all public tweets if there are no keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned.")
 
     #stream api auth specific
-    parser_stream.add_argument('-ck', '--consumer-key', '--consumer_key', type=unicode, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
-    parser_stream.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=unicode, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
-    parser_stream.add_argument('-at', '--access-token', '--access_token', type=unicode, dest='access_token', help="You can generate your user access token at http://apps.twitter.com by clicking 'Create my access token'.")    
-    parser_stream.add_argument('-ats', '--access-token-secret', '--access_token_secret', type=unicode, dest='access_token_secret', help="You can generate your user access token secret at http://apps.twitter.com by clicking 'Create my access token'.")
+    parser_stream.add_argument('-ck', '--consumer-key', '--consumer_key', type=six.text_type, dest='consumer_key', help="The consumer key that you obtain when you create an app at https://apps.twitter.com/")
+    parser_stream.add_argument('-cs', '--consumer-secret', '--consumer_secret', type=six.text_type, dest='consumer_secret', help="The consumer secret that you obtain when you create an app at https://apps.twitter.com/")
+    parser_stream.add_argument('-at', '--access-token', '--access_token', type=six.text_type, dest='access_token', help="You can generate your user access token at http://apps.twitter.com by clicking 'Create my access token'.")    
+    parser_stream.add_argument('-ats', '--access-token-secret', '--access_token_secret', type=six.text_type, dest='access_token_secret', help="You can generate your user access token secret at http://apps.twitter.com by clicking 'Create my access token'.")
 
-    parser_stream.add_argument('-v', '--verbosity', type=unicode, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')    
+    parser_stream.add_argument('-v', '--verbosity', type=six.text_type, dest='loglevel', default='WARN', choices=["DEBUG","INFO","WARN","ERROR","CRITICAL","FATAL"], help='The level of verbosity.')    
 
     if len(sys.argv)<2:
         parser.print_help()
@@ -164,7 +170,7 @@ def main():
                     logger.warn("Rate limit reached, taking a break for a minute...\n")
                     sleep(60)
                     continue
-                except TwythonError, err:
+                except TwythonError as err:
                     logger.error("Some other error occured, taking a break for half a minute: "+str(err))
                     sleep(30)
                     continue
@@ -178,7 +184,7 @@ def main():
                 except:
                     pass
                 tweets.update({'id':status['id']},status,upsert=True)
-                current_id = long(status['id'])
+                current_id = longtype(status['id'])
                 if current_id>current_since_id:
                     current_since_id = current_id
 
@@ -200,7 +206,7 @@ def main():
             #new_since_id = dict(urlparse.parse_qsl(p.query))['since_id']
             logger.debug("Rate limit for current window: "+str(twitter.get_lastfunction_header(header="x-rate-limit-remaining")))
             if since_id:
-                current_since_id = long(since_id)
+                current_since_id = longtype(since_id)
             else:
                 current_since_id = 0
             new_since_id = save_tweets(results['statuses'],current_since_id)

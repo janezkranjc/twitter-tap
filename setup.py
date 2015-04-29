@@ -18,14 +18,14 @@ CLASSIFIERS = [
 
 dist = setup(
     name='twitter-tap',
-    version='2.0.2',
+    version='2.0.3',
     author='Janez Kranjc',
     description='Collect tweets to a mongoDB using either the Twitter search API or the streaming API.',
     long_description=long_description,
     author_email='janez.kranjc@gmail.com',
     url='http://janezkranjc.github.io/twitter-tap/',
     license = 'MIT',
-    install_requires=['pymongo','twython'],
+    install_requires=['pymongo','twython','six'],
     classifiers=CLASSIFIERS,
     packages=find_packages(),
     include_package_data=True,

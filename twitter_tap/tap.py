@@ -12,7 +12,7 @@ if six.PY2:
     longtype = six.integer_types[1]
 if six.PY3:
     import urllib.parse as urlparse
-    longtype = six.integer_types
+    longtype = six.integer_types[0]
 from datetime import datetime
 from email.utils import parsedate
 

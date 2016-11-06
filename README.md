@@ -22,7 +22,7 @@ You can also use the streaming API to store tweets. Storing tweets from the stre
 
 ## Loading data from CSV ##
 
-You can also load your search and streaming keywords using CSV files. See the examples and arguments below. Add your files to
+You can also load your search and streaming keywords using CSV files. Twitter recommends that you only pass 10 keywords and operators to the search API, so create your CSV files in increments of 10. When loading from file with the search API, the OR operator is applied. See the examples and arguments below. Add your files to
 
 ```bash
 twitter-tap/data

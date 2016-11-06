@@ -57,3 +57,5 @@ docs/_build/
 #twitter-tap specific
 settings.py
 supervisord.conf
+venv/
+*.csv

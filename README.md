@@ -4,7 +4,7 @@ Collect tweets to a mongoDB using the twitter search API. If you want to save tw
 
 # About Twitter Tap #
 
-Twitter Tap is a python tool that connects to the Twitter API and issues calls to the **search endpoint** or the **streaming API** using a query that the user has entered. 
+Twitter Tap is a python tool that connects to the Twitter API and issues calls to the **search endpoint** or the **streaming API** using a query that the user has entered.
 
 ## Using the search API ##
 
@@ -19,6 +19,14 @@ The tool can be run from the command line or be run as a daemon using supervisor
 ## Using the streaming API ##
 
 You can also use the streaming API to store tweets. Storing tweets from the streaming API is much more straightforward, but you can only get the tweets you are currently streaming. Using the search API will also get you tweets from a couple of days back. Check out the documentation so that you can see what sorts of queries you can make with the search API vs the streaming API.
+
+## Loading data from CSV ##
+
+You can also load your search and streaming keywords using CSV files. See the examples and arguments below. Add your files to
+
+```bash
+twitter-tap/data
+```
 
 # Installation #
 
@@ -69,6 +77,10 @@ To execute a query you must provide a **query**, the **consumer secret** and eit
 tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley cyrus" -v DEBUG
 ```
 
+```bash
+tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -ql "miley_fans" -v DEBUG
+```
+
 Search options:
 
 | Option                 | Description                                                                                                                                                                                                                 |
@@ -79,6 +91,7 @@ Search options:
 | --result-type          | Specifies what type of search results you would prefer to receive. The current default is "mixed". Valid values include: "mixed" - Include both popular and real time results in the response. "recent" - return only the most recent results in the response. "popular" - return only the most popular results in the response. |
 | --wait                 | Mandatory sleep time before executing a query. The default value is 2, which should ensure that the rate limit of 450 per 15 minutes is never reached. |
 | --clean                | Set this switch to use a clean since_id. |
+| --query-load           | Load query terms from filename. Loads csv files, just pass in a filename without the extension|
 | --consumer-key         | The consumer key that you obtain when you create an app at https://apps.twitter.com/ |
 | --consumer-secret      | The consumer secret that you obtain when you create an app at https://apps.twitter.com/ |
 | --access-token         | You can use consumer_key and access_token instead of consumer_key and consumer_secret. This will make authentication faster, as the token will not be fetched. The access token will be printed to the standard output when connecting with the consumer_key and consumer_secret. |
@@ -96,6 +109,10 @@ To execute a query you must provide a **query**, the **consumer secret** and eit
 tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track "miley cyrus" -v DEBUG
 ```
 
+```bash
+tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track "miley cyrus" --follow-load "miley_fans" -v DEBUG
+```
+
 Streaming options:
 
 | Option | Description
@@ -105,6 +122,8 @@ Streaming options:
 | --follow | A comma separated list of user IDs, indicating the users to return statuses for in the stream. More information at https://dev.twitter.com/docs/streaming-apis/parameters#follow |
 | --track | A comma separated list of keywords or phrases to track. Phrases of keywords are specified by a comma-separated list. More information at https://dev.twitter.com/docs/streaming-apis/parameters#track |
 | --locations | A comma-separated list of longitude,latitude pairs specifying a set of bounding boxes to filter Tweets by. On geolocated Tweets falling within the requested bounding boxes will be included—unlike the Search API, the user\'s location field is not used to filter tweets. Each bounding box should be specified as a pair of longitude and latitude pairs, with the southwest corner of the bounding box coming first. For example: "-122.75,36.8,-121.75,37.8" will track all tweets from San Francisco. NOTE: Bounding boxes do not act as filters for other filter parameters. More information at https://dev.twitter.com/docs/streaming-apis/parameters#locations |
+| --track-load | Specify a filename to load and append terms from. Loads csv files, just pass in a filename without the extension |
+| --follow-load | Specify a filename to load and append account IDs from. Loads csv files, just pass in a filename without the extension |
 | --firehose | Use this option to receive all public tweets if there are no keywords, users or locations to track. This requires special permission from Twitter. Otherwise a sample of 1% of tweets will be returned. |
 | --consumer-key | The consumer key that you obtain when you create an app at https://apps.twitter.com/ |
 | --consumer-secret | The consumer secret that you obtain when you create an app at https://apps.twitter.com/ |
@@ -209,6 +228,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.4:
+
+- Added support for loading keywords from csv files.
+
 v2.0.3:
 
 - Added support for Python3.
@@ -236,4 +259,3 @@ v1.0.0:
 v0.1.0:
 
 -  Alpha release - this version needs a settings.py to enter credentials.
-

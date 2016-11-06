@@ -186,6 +186,18 @@ autorestart=true
 startsecs=10
 stopwaitsecs=10
 
+; If you want to use supervisor while loading the keywords from a file you must set the directory as follows
+
+[program:tapstream]
+command=tap stream --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET --access-token ACCESSTOKEN --access-token-secret ACCESSTOKENSECRET --track-load "miley_fans" -v DEBUG
+stdout_logfile=tap_stream.log
+stderr_logfile=tap_stream_err.log
+autostart=true
+autorestart=true
+startsecs=10
+stopwaitsecs=10
+directory=twitter_tap/
+
 ```
 
 Afterwards you can start the daemon like this (you must be in the same folder as supervisord.conf or your supervisord.conf must be /etc/)

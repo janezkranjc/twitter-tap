@@ -123,7 +123,7 @@ def main():
                 # flatten to 1D, it gets loaded as 2D array
                 result = [x for sublist in temp for x in sublist]
         except IOError as e:
-            print "I/O error({0}): {1}".format(e.errno, e.strerror)
+            print ("I/O error({0}): {1}".format(e.errno, e.strerror))
         else:
             f.closed
             return result

@@ -240,6 +240,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.5:
+
+- Fixed bug that broke Python3 support.
+
 v2.0.4:
 
 - Added support for loading keywords from csv files.

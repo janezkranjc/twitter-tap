@@ -5,6 +5,7 @@ import logging
 import sys
 import os
 import glob
+import requests
 import csv
 import argparse
 from time import sleep
@@ -344,7 +345,15 @@ def main():
                 prep_track = load_query(args.track_load,1)
                 args.track += ',' + prep_track
 
-            stream.statuses.filter(follow=args.follow,track=args.track,locations=args.locations)
+            # https://github.com/ryanmcgrath/twython/issues/288#issuecomment-66360160
+            while True:
+                try:
+                    stream.statuses.filter(follow=args.follow,track=args.track,locations=args.locations)
+                except requests.exceptions.ChunkedEncodingError as e:
+                    e = sys.exc_info()[0]
+                    print('ERROR:',e)
+                    continue
+
         elif args.firehose:
             stream.statuses.firehose()
         else:

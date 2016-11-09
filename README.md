@@ -240,6 +240,10 @@ supervisorctl shutdown
 
 # Changes #
 
+v2.0.6:
+
+- Restart the stream if it closes.
+
 v2.0.5:
 
 - Fixed bug that broke Python3 support.

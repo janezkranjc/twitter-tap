@@ -81,6 +81,14 @@ tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -q "miley
 tap search --consumer-key CONSUMERKEY --consumer-secret CONSUMERSECRET -ql "miley_fans" -v DEBUG
 ```
 
+Global options:
+
+| Option                 | Description                                    |
+|------------------------|------------------------------------------------|
+| --output               | Output tweets to files.                        |
+| --interval             | Interval in minutes when to create a new file. |
+
+
 Search options:
 
 | Option                 | Description                                                                                                                                                                                                                 |
@@ -239,6 +247,10 @@ supervisorctl shutdown
 - **Supervisor** http://supervisord.org/
 
 # Changes #
+
+v2.1.0:
+
+- Allow saving tweets to files.
 
 v2.0.6:
 

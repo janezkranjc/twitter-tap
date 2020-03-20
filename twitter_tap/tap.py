@@ -5,7 +5,6 @@ import logging
 import sys
 import os
 import glob
-from logging.handlers import TimedRotatingFileHandler
 
 import requests
 import csv
@@ -13,6 +12,8 @@ import argparse
 from time import sleep
 import signal
 import six
+
+from filer import filer
 
 if six.PY2:
     import urlparse
@@ -26,20 +27,7 @@ from datetime import datetime
 from email.utils import parsedate
 
 
-class Record(object):
-    exc_info = ""
-    exc_text = ""
-    stack_info = ""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-    def getMessage(self):
-        return self.msg
-
-
 def main():
-    csv_path = "data/"
     FORMAT = '[%(asctime)-15s] %(levelname)s: %(message)s'
 
     try:
@@ -66,6 +54,8 @@ def main():
 
     def exit_gracefully(signal, frame):
         logger.warning("Shutdown signal received! Shutting down.")
+        if args.output:
+            file_writer.toDisc()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, exit_gracefully)
@@ -75,8 +65,8 @@ def main():
         description='Twitter acquisition pipeline using the search API: Query the Twitter API and store Tweets in MongoDB. The tweets can be obtained either by the search API or the streaming API. The arguments and options are different based on the type of acquisition.')
 
     parser.add_argument('-o', '--output', type=six.text_type, default="", dest='output',
-                        help="Ignore database and save tweets to files.")
-    parser.add_argument('-i', '--interval', type=int, default=1, dest='interval')
+                        help="Ignore database and save tweets to files into output folder.")
+    parser.add_argument('-n', '--number', type=int, default=1000, dest='number', help="Number of tweets per file.")
 
     subparsers = parser.add_subparsers(dest='subcommand',
                                        help='Use either search or stream for acquiring tweets. For help with these commands please enter "tap stream help" or "tap search help".')
@@ -183,7 +173,7 @@ def main():
         Accepts a file name and loads it as a list
         """
         try:
-            with open(csv_path + filename + '.csv', 'r') as f:
+            with open(filename + '.csv', 'r') as f:
                 reader = csv.reader(f)
                 temp = list(reader)
                 # flatten to 1D, it gets loaded as 2D array
@@ -286,7 +276,7 @@ def main():
             else:
                 since_id = None
         else:
-            log_handler = TimedRotatingFileHandler(args.output, when='m', interval=args.interval)
+            file_writer = filer(args.output, args.number)
             current_query = None
             since_id = None
 
@@ -308,7 +298,7 @@ def main():
         def save_tweets(statuses, current_since_id):
             for status in statuses:
                 if args.output:
-                    log_handler.emit(Record(msg=status))
+                    file_writer.emit(status)
                 else:
                     status['created_at'] = parse_datetime(status['created_at'])
                     try:
@@ -390,7 +380,7 @@ def main():
             tweets.ensure_index("id", direction=pymongo.DESCENDING, unique=True)
             tweets.ensure_index([("coordinates.coordinates", pymongo.GEO2D), ])
         else:
-            log_handler = TimedRotatingFileHandler(args.output, when='m', interval=args.interval)
+            file_writer = filer(args.output, args.number)
 
         class TapStreamer(TwythonStreamer):
             def on_success(self, data):
@@ -407,7 +397,7 @@ def main():
                             exc_type, exc_obj, exc_tb = sys.exc_info()
                             logger.error("Couldn't save a tweet: " + str(exc_obj))
                     else:
-                        log_handler.emit(Record(msg=data))
+                        file_writer.emit(data)
                 if 'limit' in data:
                     logger.warning(
                         "The filtered stream has matched more Tweets than its current rate limit allows it to be delivered.")

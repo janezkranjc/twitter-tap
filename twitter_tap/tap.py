@@ -13,7 +13,7 @@ from time import sleep
 import signal
 import six
 
-from filer import filer
+from .filer import Filer
 
 if six.PY2:
     import urlparse
@@ -55,7 +55,7 @@ def main():
     def exit_gracefully(signal, frame):
         logger.warning("Shutdown signal received! Shutting down.")
         if args.output:
-            file_writer.toDisc()
+            file_writer.close_file()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, exit_gracefully)
@@ -276,7 +276,7 @@ def main():
             else:
                 since_id = None
         else:
-            file_writer = filer(args.output, args.number)
+            file_writer = Filer(args.output, args.number)
             current_query = None
             since_id = None
 
@@ -380,7 +380,7 @@ def main():
             tweets.ensure_index("id", direction=pymongo.DESCENDING, unique=True)
             tweets.ensure_index([("coordinates.coordinates", pymongo.GEO2D), ])
         else:
-            file_writer = filer(args.output, args.number)
+            file_writer = Filer(args.output, args.number)
 
         class TapStreamer(TwythonStreamer):
             def on_success(self, data):

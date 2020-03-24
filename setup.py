@@ -19,7 +19,7 @@ CLASSIFIERS = [
 
 dist = setup(
     name='twitter-tap',
-    version='2.2.0',
+    version='2.2.1',
     author='Janez Kranjc',
     description='Collect tweets to a mongoDB using either the Twitter search API or the streaming API.',
     long_description=long_description,

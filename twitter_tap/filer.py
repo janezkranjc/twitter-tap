@@ -24,7 +24,7 @@ class Filer:
         text_to_wtite = json.dumps(dict_entry) + "\n"
         self.file.write(text_to_wtite)
         self.counter += 1
-        if self.counter > self.flush_every:
+        if self.counter % self.flush_every == 0:
             self.file.flush()
         if self.counter >= self.n:  # add condition  "if new day"
             self.close_file()
